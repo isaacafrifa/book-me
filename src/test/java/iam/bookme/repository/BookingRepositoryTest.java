@@ -13,7 +13,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,6 +26,7 @@ class BookingRepositoryTest extends AbstractContainerTest {
     @Autowired
     private BookingRepository underTest;
     private Booking booking;
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     @BeforeEach
     void setUp() {
@@ -34,9 +35,9 @@ class BookingRepositoryTest extends AbstractContainerTest {
         booking = new Booking(
                 id,
                 "test@email.com",
-                LocalDateTime.parse("2022-08-01T10:00:00Z"),
-                LocalDateTime.parse("2022-08-01T10:00:00Z"),
-                LocalDateTime.parse("2022-08-05T11:00:00Z"),
+                LocalDateTime.parse("2022-08-01T10:00:00Z", formatter),
+                LocalDateTime.parse("2022-08-01T10:00:00Z", formatter),
+                LocalDateTime.parse("2022-08-05T11:00:00Z", formatter),
                 45,
                 BookingStatus.PENDING,
                 "This is a test booking.");

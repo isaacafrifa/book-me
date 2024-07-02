@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table
+@Table(name="booking")
 @EntityListeners(AuditingEntityListener.class)
 @AllArgsConstructor
 @NoArgsConstructor

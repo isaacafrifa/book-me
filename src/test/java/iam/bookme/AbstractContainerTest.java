@@ -1,20 +1,29 @@
 package iam.bookme;
 
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
-public class AbstractContainerTest {
+public abstract class AbstractContainerTest {
 
-	public static PostgreSQLContainer POSTGRESQL_CONTAINER;
+	public static final String POSTGRES_IMAGE = "postgres:16.1";
+	public static final String DATABASE_NAME = "booking_db";
+
+	protected static PostgreSQLContainer<?> postgresContainer;
 
 	static {
-		POSTGRESQL_CONTAINER = new PostgreSQLContainer("postgres:16.1")
-//                .withInitScript("config/INIT.sql")
-				.withDatabaseName("booking_db");
-		POSTGRESQL_CONTAINER.start();
+		postgresContainer = new PostgreSQLContainer<>(POSTGRES_IMAGE)
+				.withDatabaseName(DATABASE_NAME);
+		postgresContainer.start();
 	}
 
-
+	@DynamicPropertySource
+	static void setProperties(DynamicPropertyRegistry registry) {
+		registry.add("spring.datasource.url", postgresContainer::getJdbcUrl);
+		registry.add("spring.datasource.username", postgresContainer::getUsername);
+		registry.add("spring.datasource.password", postgresContainer::getPassword);
+	}
 
 }

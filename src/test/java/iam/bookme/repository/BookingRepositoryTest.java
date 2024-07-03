@@ -11,29 +11,32 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 @DisplayName("Running repository tests")
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@ActiveProfiles("test")
 class BookingRepositoryTest extends AbstractContainerTest {
 
     @Autowired
     private BookingRepository underTest;
     private Booking booking;
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     @BeforeEach
     void setUp() {
-        UUID id = UUID.randomUUID();
-        //create the booking object
         booking = new Booking(
-                id,
+                null, // Let Hibernate generate ID
                 "test@email.com",
                 LocalDateTime.parse("2022-08-01T10:00:00Z", formatter),
                 LocalDateTime.parse("2022-08-01T10:00:00Z", formatter),
@@ -42,6 +45,7 @@ class BookingRepositoryTest extends AbstractContainerTest {
                 BookingStatus.PENDING,
                 "This is a test booking.");
     }
+
     @AfterEach
     void tearDown() {
         underTest.deleteAll();
@@ -50,29 +54,30 @@ class BookingRepositoryTest extends AbstractContainerTest {
     @Test
     void shouldFindByBookingId() {
         // given
-underTest.save(booking);
+         underTest.save(booking);
+        var generatedId = booking.getBookingId();
         // when
-        var actual = underTest.findById(booking.getBookingId());
+        var actual = underTest.findById(generatedId);
         //then
         assertNotNull(actual);
+        assertTrue(actual.isPresent());
+        assertEquals(booking.getBookingId(), actual.get().getBookingId());
+        assertEquals(booking.getStartTime(), actual.get().getStartTime());
+        assertEquals(booking.getEndTime(), actual.get().getEndTime());
+        assertEquals(booking.getDurationInMinutes(), actual.get().getDurationInMinutes());
+        assertEquals(booking.getStatus(), actual.get().getStatus());
     }
 
     @Test
-    @Disabled
-    void shouldThrowException_WhenItDoesNot_FindByBookingId() {
+    void shouldReturnEmpty_WhenItDoesNot_FindByBookingId() {
         // given
+        underTest.save(booking);
+        UUID randomUUID = UUID.randomUUID();
         // when
+        var actual = underTest.findById(randomUUID);
         //then
-        fail("Not implemented yet");
-    }
-
-    @Test
-    @Disabled
-    void shouldThrowException_WhenNullIsPaasedInto_FindByBookingId() {
-        // given
-        // when
-        //then
-        fail("Not implemented yet");
+        assertNotNull(actual);
+        assertTrue(actual.isEmpty());
     }
 
     @Disabled

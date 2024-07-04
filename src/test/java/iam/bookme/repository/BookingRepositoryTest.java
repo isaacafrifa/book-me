@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -54,7 +55,7 @@ class BookingRepositoryTest extends AbstractContainerTest {
     @Test
     void shouldFindByBookingId() {
         // given
-         underTest.save(booking);
+        underTest.save(booking);
         var generatedId = booking.getBookingId();
         // when
         var actual = underTest.findById(generatedId);
@@ -80,13 +81,38 @@ class BookingRepositoryTest extends AbstractContainerTest {
         assertTrue(actual.isEmpty());
     }
 
+    @Test
+    void shouldFindAllBookingsByUserEmail() {
+        //given
+        underTest.save(booking);
+        var generatedId = booking.getBookingId();
+        //when
+        var actual = underTest.findAllByUserEmail(booking.getUserEmail());
+        //then
+        assertNotNull(actual);
+        assertEquals(1, actual.size());
+        assertAll(
+                ()-> assertEquals("test@email.com", actual.get(0).getUserEmail()),
+                ()-> assertEquals(generatedId, actual.get(0).getBookingId()),
+                ()-> assertEquals(BookingStatus.PENDING, actual.get(0).getStatus()),
+                ()-> assertEquals("This is a test booking.", actual.get(0).getComments())
+        );
+    }
+
+    @Test
+    void shouldReturnEmptyList_ForNonexistentEmail_FindAllByUserEmail() {
+        // given
+        underTest.save(booking);
+        // when
+        var actual = underTest.findAllByUserEmail("nonexistent@email.com");
+        // then
+        assertNotNull(actual);
+        assertTrue(actual.isEmpty());
+    }
+
     @Disabled
     @Test
     void findAllByStartTimeAfter() {
     }
 
-    @Disabled
-    @Test
-    void findAllByUser() {
-    }
 }

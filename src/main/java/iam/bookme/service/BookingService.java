@@ -1,4 +1,6 @@
 package iam.bookme.service;
 
-public class BookingService {
+import iam.bookme.repository.BookingRepository;
+
+public record BookingService (BookingRepository bookingRepository) {
 }

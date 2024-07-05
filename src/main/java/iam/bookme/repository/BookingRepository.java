@@ -13,7 +13,8 @@ import java.util.UUID;
 public interface BookingRepository extends JpaRepository<Booking, UUID> {
     Optional<Booking> findByBookingId(UUID bookingId);
 
-    List<Booking> findAllByStartTimeAfter(LocalDateTime afterTime); // Find bookings starting after a specific time
+    // Find bookings starting after a specific time. It can be used to get upcoming bookings
+    List<Booking> findAllByStartTimeAfter(LocalDateTime specifiedTime);
 
     List<Booking> findAllByUserEmail(String userEmail);
 }

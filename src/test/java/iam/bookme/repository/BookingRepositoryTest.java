@@ -1,6 +1,7 @@
 package iam.bookme.repository;
 
 import iam.bookme.AbstractContainerTest;
+import iam.bookme.TestContext;
 import iam.bookme.entity.Booking;
 import iam.bookme.enums.BookingStatus;
 import org.junit.jupiter.api.AfterEach;
@@ -13,7 +14,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -31,20 +31,13 @@ class BookingRepositoryTest extends AbstractContainerTest {
 
     @Autowired
     private BookingRepository underTest;
+    private final TestContext testContext = new TestContext();
     private Booking booking;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+
 
     @BeforeEach
     void setUp() {
-        booking = new Booking(
-                null, // Let Hibernate generate ID
-                "test@email.com",
-                LocalDateTime.parse("2022-08-01T10:00:00Z", formatter),
-                LocalDateTime.parse("2022-08-01T10:00:00Z", formatter),
-                LocalDateTime.parse("2022-08-05T11:00:00Z", formatter),
-                45,
-                BookingStatus.PENDING,
-                "This is a test booking.");
+        booking = testContext.getTestBooking();
     }
 
     @AfterEach

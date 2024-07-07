@@ -2,6 +2,7 @@ package iam.bookme.service;
 
 import iam.bookme.dto.BookingDto;
 import iam.bookme.dto.BookingMapper;
+import iam.bookme.entity.Booking;
 import iam.bookme.repository.BookingRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,4 +24,10 @@ public record BookingService (BookingRepository bookingRepository, BookingMapper
         if (direction.contains("desc")) return Sort.Direction.DESC;
         return Sort.Direction.ASC;
     }
+
+    public BookingDto createBooking(BookingDto bookingDto) {
+        Booking toBeSaved = bookingMapper.toEntity(bookingDto);
+        return bookingMapper.toDto(bookingRepository.save(toBeSaved));
+    }
+
 }

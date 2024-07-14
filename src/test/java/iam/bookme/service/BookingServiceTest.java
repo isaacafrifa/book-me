@@ -22,8 +22,10 @@ import org.springframework.data.domain.Sort;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -136,10 +138,31 @@ class BookingServiceTest {
     @Test
     void getBookingById_shouldReturnNotFoundException() {
         //given
-        //when
-        //then
-
+        given(bookingRepository.findById(TestContext.bookingId)).willThrow(RuntimeException.class);
+        //when + then
+        assertThrows(RuntimeException.class,
+                () -> underTest.getBookingById(TestContext.bookingId),
+                "Should throw booking not found exception"
+        );
+        verify(bookingMapper, never()).toDto(booking);
     }
 
+    @Test
+    void getBookingById_shouldThrowExceptionForNullId() {
+        // when + then
+        assertThrows(RuntimeException.class, () -> underTest.getBookingById(null));
+    }
+
+    @Test
+    void getBookingById_shouldThrowExceptionForInvalidIdType() {
+        // Given
+        String invalidId = "invalid-string-id";
+        // When + Then
+        try {
+            underTest.getBookingById(UUID.fromString(invalidId));
+        } catch (Exception e) {
+            assertInstanceOf(IllegalArgumentException.class, e, "Unexpected exception type: " + e.getClass().getName());
+        }
+    }
 
 }

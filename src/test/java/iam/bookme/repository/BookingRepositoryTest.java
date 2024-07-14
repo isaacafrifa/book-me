@@ -14,7 +14,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,7 +33,6 @@ class BookingRepositoryTest extends AbstractContainerTest {
     private final TestContext testContext = new TestContext();
     private Booking booking;
 
-
     @BeforeEach
     void setUp() {
         booking = testContext.getTestBooking();
@@ -43,35 +41,6 @@ class BookingRepositoryTest extends AbstractContainerTest {
     @AfterEach
     void tearDown() {
         underTest.deleteAll();
-    }
-
-    @Test
-    void findAllByBookingId_shouldFindBookingById() {
-        // given
-        underTest.save(booking);
-        var generatedId = booking.getBookingId();
-        // when
-        var actual = underTest.findById(generatedId);
-        //then
-        assertNotNull(actual);
-        assertTrue(actual.isPresent());
-        assertEquals(booking.getBookingId(), actual.get().getBookingId());
-        assertEquals(booking.getStartTime(), actual.get().getStartTime());
-        assertEquals(booking.getEndTime(), actual.get().getEndTime());
-        assertEquals(booking.getDurationInMinutes(), actual.get().getDurationInMinutes());
-        assertEquals(booking.getStatus(), actual.get().getStatus());
-    }
-
-    @Test
-    void findAllByBookingId_shouldReturnEmpty_WhenNotFound() {
-        // given
-        underTest.save(booking);
-        UUID randomUUID = UUID.randomUUID();
-        // when
-        var actual = underTest.findById(randomUUID);
-        //then
-        assertNotNull(actual);
-        assertTrue(actual.isEmpty());
     }
 
     @Test

@@ -1,6 +1,7 @@
 package iam.bookme.service;
 
 import iam.bookme.TestContext;
+import iam.bookme.dto.BookingDto;
 import iam.bookme.dto.BookingMapper;
 import iam.bookme.entity.Booking;
 import iam.bookme.repository.BookingRepository;
@@ -20,9 +21,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @DisplayName("Running bookingService tests")
@@ -39,12 +46,17 @@ class BookingServiceTest {
 
     private final TestContext testContext = new TestContext();
     private Booking booking;
+    private BookingDto bookingDto;
     @Captor
     ArgumentCaptor<Booking> bookingArgumentCaptor;
 
     @BeforeEach
     void setUp() {
-      booking = testContext.getTestBooking();
+        booking = testContext.getTestBooking();
+        bookingDto = new BookingDto(null,
+                booking.getUserEmail(), booking.getCreatedDate(),
+                booking.getUpdatedDate(), booking.getStartTime(),
+                booking.getStatus(), booking.getComments());
     }
 
     @Test
@@ -76,5 +88,58 @@ class BookingServiceTest {
         verify(bookingRepository).findAll(pageable);
         assertEquals(0, actual.getTotalElements(), "Expected no booking");
     }
+
+    @Test
+    void saveBooking_shouldSaveBooking() {
+        // given
+        given(bookingMapper.toEntity(bookingDto)).willReturn(booking);
+        given(bookingRepository.save(booking)).willReturn(booking);
+        // when
+        underTest.createBooking(bookingDto);
+        // then
+        verify(bookingMapper).toEntity(bookingDto);
+        verify(bookingRepository).save(bookingArgumentCaptor.capture());
+        verify(bookingMapper, times(1)).toDto(booking);
+        Booking capturedBooking = bookingArgumentCaptor.getValue();
+        assertEquals(booking.getUserEmail(), capturedBooking.getUserEmail());
+        assertEquals(booking.getComments(), capturedBooking.getComments());
+    }
+
+    @Test
+    void saveBooking_shouldThrowExceptionWhenBookingAlreadyExists() {
+        // given
+        given(bookingRepository.existsByUserEmailIgnoreCase(bookingDto.getUserEmail())).willReturn(true);
+        // when + then
+        assertThrows(
+                RuntimeException.class,
+                () -> underTest.createBooking(bookingDto),
+                "Should throw exception"
+        );
+        verify(bookingMapper, never()).toEntity(bookingDto);
+        verify(bookingRepository, never()).save(any());
+        verify(bookingMapper, never()).toDto(any());
+    }
+
+    @Test
+    void getBookingById_shouldReturnBookingDto() {
+        // given
+        given(bookingMapper.toDto(any())).willReturn(bookingDto);
+        given(bookingRepository.findById(any())).willReturn(Optional.of(booking));
+        // when
+        var actualDto = underTest.getBookingById(booking.getBookingId());
+        // then
+        verify(bookingMapper).toDto(booking);
+        verify(bookingRepository).findById(booking.getBookingId());
+        assertNotNull(actualDto, "Expected a BookingDto to be returned");
+    }
+
+    @Test
+    void getBookingById_shouldReturnNotFoundException() {
+        //given
+        //when
+        //then
+
+    }
+
 
 }

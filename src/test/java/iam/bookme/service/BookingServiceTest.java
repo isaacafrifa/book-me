@@ -165,4 +165,54 @@ class BookingServiceTest {
         }
     }
 
+    @Test
+    void updateBooking_shouldUpdateBooking() {
+        // given
+        given(bookingRepository.findById(any())).willReturn(Optional.of(booking));
+        // when
+        underTest.updateBooking(TestContext.bookingId, bookingDto);
+        // then
+        verify(bookingRepository).save(bookingArgumentCaptor.capture());
+        Booking capturedBooking = bookingArgumentCaptor.getValue();
+        assertEquals(booking.getUserEmail(), capturedBooking.getUserEmail());
+        assertEquals(bookingDto.getStartTime(), capturedBooking.getStartTime());
+        assertEquals(bookingDto.getStatus(), capturedBooking.getStatus());
+        assertEquals(booking.getComments(), capturedBooking.getComments());
+        assertEquals(booking.getDurationInMinutes(), capturedBooking.getDurationInMinutes());
+    }
+
+    @Test
+    void updateBooking_shouldThrowExceptionForNonexistentId() {
+        // given
+        UUID nonExistentId = UUID.randomUUID();
+        given(bookingRepository.findById(nonExistentId)).willReturn(Optional.empty());
+        // when + then
+        assertThrows(RuntimeException.class,
+                () -> underTest.updateBooking(nonExistentId, bookingDto),
+                "Should throw an exception");
+    }
+
+    @Test
+    void deleteBooking_shouldDeleteBooking() {
+        // given
+        UUID bookingId = TestContext.bookingId;
+        given(bookingRepository.existsById(any())).willReturn(true);
+        // when
+        underTest.deleteBooking(bookingId);
+        // then
+        verify(bookingRepository).deleteById(bookingId);
+    }
+
+    @Test
+    void deleteBooking_shouldThrowExceptionForNonexistentId() {
+        // given
+        UUID nonExistentId = UUID.randomUUID();
+        given(bookingRepository.existsById(nonExistentId)).willReturn(false);
+        // when + then
+        assertThrows(RuntimeException.class,
+                () -> underTest.deleteBooking(nonExistentId),
+                "Should throw an exception");
+        verify(bookingRepository, never()).deleteById(nonExistentId);
+    }
+
 }

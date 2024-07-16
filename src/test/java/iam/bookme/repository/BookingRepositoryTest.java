@@ -1,22 +1,26 @@
 package iam.bookme.repository;
 
 import iam.bookme.AbstractContainerTest;
-import iam.bookme.TestContext;
 import iam.bookme.entity.Booking;
 import iam.bookme.enums.BookingStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,20 +31,56 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 class BookingRepositoryTest extends AbstractContainerTest {
-
     @Autowired
     private BookingRepository underTest;
-    private final TestContext testContext = new TestContext();
     private Booking booking;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     @BeforeEach
     void setUp() {
-        booking = testContext.getTestBooking();
+        booking = new Booking(
+                null, // Let Hibernate generate ID
+                "test@email.com",
+                LocalDateTime.parse("2022-08-01T10:00:00Z", formatter),
+                LocalDateTime.parse("2022-08-01T10:00:00Z", formatter),
+                LocalDateTime.parse("2022-08-05T11:00:00Z", formatter),
+                45,
+                BookingStatus.PENDING,
+                "This is a test booking.");
     }
 
     @AfterEach
     void tearDown() {
         underTest.deleteAll();
+    }
+
+    @Test
+    void findAllByBookingId_shouldFindBookingById() {
+        // given
+        underTest.save(booking);
+        var generatedId = booking.getBookingId();
+        // when
+        var actual = underTest.findById(generatedId);
+        //then
+        assertNotNull(actual);
+        assertTrue(actual.isPresent());
+        assertEquals(booking.getBookingId(), actual.get().getBookingId());
+        assertEquals(booking.getStartTime(), actual.get().getStartTime());
+        assertEquals(booking.getEndTime(), actual.get().getEndTime());
+        assertEquals(booking.getDurationInMinutes(), actual.get().getDurationInMinutes());
+        assertEquals(booking.getStatus(), actual.get().getStatus());
+    }
+
+    @Test
+    void findAllByBookingId_shouldReturnEmpty_WhenNotFound() {
+        // given
+        underTest.save(booking);
+        UUID randomUUID = UUID.randomUUID();
+        // when
+        var actual = underTest.findById(randomUUID);
+        //then
+        assertNotNull(actual);
+        assertTrue(actual.isEmpty());
     }
 
     @Test
@@ -78,10 +118,8 @@ class BookingRepositoryTest extends AbstractContainerTest {
         LocalDateTime now = LocalDateTime.of(2022, 8, 5, 10, 0);
         LocalDateTime startTime1 = now.minusDays(0).withHour(9).withMinute(59);
         LocalDateTime startTime2 = now.plusDays(1).withHour(10).withMinute(10);
-
         Booking booking1 = new Booking(null, "book1@test.com", null, null, startTime1, 60, BookingStatus.PENDING, null);
         Booking booking2 = new Booking(null, "book2@test.com", null, null, startTime2, 60, BookingStatus.CANCELLED, null);
-
         underTest.save(booking);
         underTest.save(booking1);
         underTest.save(booking2);
@@ -103,7 +141,6 @@ class BookingRepositoryTest extends AbstractContainerTest {
         // given
         LocalDateTime now = LocalDateTime.of(2022, 8, 5, 10, 0);
         Booking booking1 = new Booking(null, "book1@test.com", null, null, now, 60, BookingStatus.PENDING, null);
-
         underTest.save(booking1);
         // when
         var actual = underTest.findAllByStartTimeAfter(now);
@@ -121,6 +158,46 @@ class BookingRepositoryTest extends AbstractContainerTest {
         // Then
         assertNotNull(actual);
         assertEquals(0, actual.size());
+    }
+
+    @Test
+    void existsByUserEmailIgnoreCase_shouldReturnTrue_ForExistingUserEmail() {
+        //given
+        underTest.save(booking);
+        //when
+        var actual = underTest.existsByUserEmailIgnoreCase(booking.getUserEmail());
+        //then
+        assertTrue(actual);
+    }
+
+    @Test
+    void existsByUserEmailIgnoreCase_shouldReturnFalse_ForNull() {
+        //when
+        var actual = underTest.existsByUserEmailIgnoreCase(null);
+        //then
+        assertFalse(actual);
+    }
+
+    @ParameterizedTest
+    @DisplayName("test for non existing user email, and empty argument")
+    @ValueSource(strings = {"dummy@test.com", ""})
+    void existsByUserEmailIgnoreCase_shouldReturnFalse(String input) {
+        //when
+        var actual = underTest.existsByUserEmailIgnoreCase(input);
+        //then
+        assertFalse(actual);
+    }
+
+    @ParameterizedTest
+    @DisplayName("test for existing user email in uppercase and mixed case")
+    @ValueSource(strings = {"TEST@EMAIL.COM", "TEst@EMAIL.com"})
+    void existsByUserEmailIgnoreCase_shouldReturnTrue(String email) {
+        //given
+        underTest.save(booking);
+        //when
+        var actual = underTest.existsByUserEmailIgnoreCase(email);
+        //then
+        assertTrue(actual);
     }
 
 }

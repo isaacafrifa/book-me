@@ -4,8 +4,8 @@ import iam.bookme.TestContext;
 import iam.bookme.dto.BookingDto;
 import iam.bookme.dto.BookingMapper;
 import iam.bookme.entity.Booking;
-import iam.bookme.exception.ResourceAlreadyExists;
-import iam.bookme.exception.ResourceNotFound;
+import iam.bookme.exception.ResourceAlreadyExistsException;
+import iam.bookme.exception.ResourceNotFoundException;
 import iam.bookme.repository.BookingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -115,7 +115,7 @@ class BookingServiceTest {
         given(bookingRepository.existsByUserEmailIgnoreCase(bookingDto.getUserEmail())).willReturn(true);
         // when + then
         assertThrows(
-                ResourceAlreadyExists.class,
+                ResourceAlreadyExistsException.class,
                 () -> underTest.createBooking(bookingDto),
                 "Should throw exception"
         );
@@ -140,9 +140,9 @@ class BookingServiceTest {
     @Test
     void getBookingById_shouldReturnNotFoundException() {
         //given
-        given(bookingRepository.findById(TestContext.bookingId)).willThrow(ResourceNotFound.class);
+        given(bookingRepository.findById(TestContext.bookingId)).willThrow(ResourceNotFoundException.class);
         //when + then
-        assertThrows(ResourceNotFound.class,
+        assertThrows(ResourceNotFoundException.class,
                 () -> underTest.getBookingById(TestContext.bookingId),
                 "Should throw booking not found exception"
         );
@@ -152,7 +152,7 @@ class BookingServiceTest {
     @Test
     void getBookingById_shouldThrowExceptionForNullId() {
         // when + then
-        assertThrows(ResourceNotFound.class, () -> underTest.getBookingById(null));
+        assertThrows(ResourceNotFoundException.class, () -> underTest.getBookingById(null));
     }
 
     @Test
@@ -189,7 +189,7 @@ class BookingServiceTest {
         UUID nonExistentId = UUID.randomUUID();
         given(bookingRepository.findById(nonExistentId)).willReturn(Optional.empty());
         // when + then
-        assertThrows(ResourceNotFound.class,
+        assertThrows(ResourceNotFoundException.class,
                 () -> underTest.updateBooking(nonExistentId, bookingDto),
                 "Should throw an exception");
     }
@@ -211,7 +211,7 @@ class BookingServiceTest {
         UUID nonExistentId = UUID.randomUUID();
         given(bookingRepository.existsById(nonExistentId)).willReturn(false);
         // when + then
-        assertThrows(ResourceNotFound.class,
+        assertThrows(ResourceNotFoundException.class,
                 () -> underTest.deleteBooking(nonExistentId),
                 "Should throw an exception");
         verify(bookingRepository, never()).deleteById(nonExistentId);

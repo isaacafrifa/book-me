@@ -3,8 +3,8 @@ package iam.bookme.service;
 import iam.bookme.dto.BookingDto;
 import iam.bookme.dto.BookingMapper;
 import iam.bookme.entity.Booking;
-import iam.bookme.exception.ResourceAlreadyExists;
-import iam.bookme.exception.ResourceNotFound;
+import iam.bookme.exception.ResourceAlreadyExistsException;
+import iam.bookme.exception.ResourceNotFoundException;
 import iam.bookme.repository.BookingRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,13 +30,13 @@ public record BookingService(BookingRepository bookingRepository, BookingMapper 
     public BookingDto getBookingById(UUID bookingId) {
         return bookingRepository.findById(bookingId)
                 .map(bookingMapper::toDto)
-                .orElseThrow(() -> new ResourceNotFound(BOOKING_NOT_FOUND_MESSAGE));
+                .orElseThrow(() -> new ResourceNotFoundException(BOOKING_NOT_FOUND_MESSAGE));
     }
 
     public BookingDto createBooking(BookingDto bookingDto) {
         if (Boolean.TRUE.equals(bookingRepository.existsByUserEmailIgnoreCase(bookingDto.getUserEmail()))) {
             log.info("Booking [user email: {}] already exists", bookingDto.getUserEmail());
-            throw new ResourceAlreadyExists("Booking already exists");
+            throw new ResourceAlreadyExistsException("Booking already exists");
         }
         Booking toBeSaved = bookingMapper.toEntity(bookingDto);
         return bookingMapper.toDto(bookingRepository.save(toBeSaved));
@@ -56,7 +56,7 @@ public record BookingService(BookingRepository bookingRepository, BookingMapper 
     public void deleteBooking(UUID bookingId) {
         if (!bookingRepository.existsById(bookingId)) {
             log.info("Booking with id {} not found", bookingId);
-            throw new ResourceNotFound(BOOKING_NOT_FOUND_MESSAGE);
+            throw new ResourceNotFoundException(BOOKING_NOT_FOUND_MESSAGE);
         }
         bookingRepository.deleteById(bookingId);
         log.info("Booking with id {} deleted successfully", bookingId);
@@ -68,7 +68,7 @@ public record BookingService(BookingRepository bookingRepository, BookingMapper 
                 .findById(bookingId).
                 orElseThrow(() -> {
                     log.info("Booking with id {} not found", bookingId);
-                    return new ResourceNotFound(BOOKING_NOT_FOUND_MESSAGE);
+                    return new ResourceNotFoundException(BOOKING_NOT_FOUND_MESSAGE);
                 });
     }
 

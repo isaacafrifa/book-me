@@ -1,0 +1,74 @@
+openapi: 3.0.0
+info:
+  title: Booking API
+  description: API for managing bookings
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local server
+    variables:
+      basePath:
+        default: /api/v1
+paths:
+  /bookings:
+    get:
+      summary: Get all bookings
+      description: Returns a paginated list of all booking entries.
+      parameters:
+        - in: query
+          name: pageNo
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+          required: false
+          description: Page number (defaults to 0)
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            default: 10
+          description: Number of bookings per page (defaults to 10)
+          required: false
+        - in: query
+          name: direction
+          schema:
+            type: string
+            enum: [ asc, desc ]
+            default: asc
+          description: Sorting direction (defaults to ascending)
+          required: false
+        - in: query
+          name: orderBy
+          schema:
+            type: string
+            enum: [ id, startTime, status ]
+            default: id
+          description: Field to sort by e.g., startTime (defaults to id)
+          required: false
+      responses:
+        '200':
+          description: Successful operation producing a paginated list of bookings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                  #                      $ref: '#/components/schemas/BookingDto'
+                  totalElements:
+                    type: integer
+                    format: int64
+                    description: Total number of bookings
+                    example: 100
+                  totalPages:
+                    type: integer
+                    format: int64
+                    description: Total number of pages
+                    example: 10
+
+
+

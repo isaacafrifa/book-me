@@ -1,4 +1,9 @@
 package iam.bookme.controller;
 
-public class BookingController {
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@Slf4j
+public class BookingController implements BookingsApi {
 }

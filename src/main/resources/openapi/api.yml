@@ -1,8 +1,10 @@
-openapi: 3.0.0
+openapi: 3.1.0
 info:
   title: Booking API
   description: API for managing bookings
   version: 1.0.0
+  contact:
+    email: afrifa@example.com
 servers:
   - url: http://localhost:8080
     description: Local server
@@ -14,6 +16,8 @@ paths:
     get:
       summary: Get all bookings
       description: Returns a paginated list of all booking entries.
+      tags:
+        - bookings
       parameters:
         - in: query
           name: pageNo
@@ -58,7 +62,7 @@ paths:
                   content:
                     type: array
                     items:
-                  #                      $ref: '#/components/schemas/BookingDto'
+                      $ref: '#/components/schemas/BookingDto'
                   totalElements:
                     type: integer
                     format: int64
@@ -69,6 +73,68 @@ paths:
                     format: int64
                     description: Total number of pages
                     example: 10
+        '400':
+          description: Bad request (e.g., invalid parameter values)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+
+
+
+components:
+  schemas:
+    BookingDto:
+      type: object
+      properties:
+        bookingId:
+          type: string
+          format: uuid
+        userEmail:
+          type: string
+        createdDate:
+          type: string
+          format: date-time
+        updatedDate:
+          type: string
+          format: date-time
+        startTime:
+          type: string
+          format: date-time
+        bookingStatus:
+          $ref: '#/components/schemas/BookingStatus'
+        comments:
+          type: string
+    BookingStatus:
+      type: string
+      description: The status of the booking
+      enum:
+        - Pending
+        - Confirmed
+        - Cancelled
+      #  enum: [ PENDING, CONFIRMED, CANCELLED ]
+    APIError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+          example: Invalid parameter value
+        path:
+          type: string
+          description: Path of the request that caused the error
+          example: /api/v1/bookings
+        timeStamp:
+          type: string
+          format: date-time
+          description: Timestamp of the error
+          example: '2023-05-25T12:34:56.000Z'
 
 
 

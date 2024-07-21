@@ -1,6 +1,6 @@
 package iam.bookme.entity;
 
-import iam.bookme.enums.BookingStatus;
+import iam.bookme.dto.BookingStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
@@ -17,7 +17,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
@@ -35,10 +35,10 @@ public class Booking {
 
     private String userEmail;
     @CreatedDate
-    private LocalDateTime createdDate;
+    private OffsetDateTime createdDate;
     @LastModifiedDate
-    private LocalDateTime updatedDate;
-    private LocalDateTime startTime;
+    private OffsetDateTime updatedDate;
+    private OffsetDateTime startTime;
     private int durationInMinutes; // Duration of the booking in minutes
 
     @Enumerated(EnumType.STRING)
@@ -47,7 +47,7 @@ public class Booking {
     private String comments;
 
     // Additional methods for calculating endTime, validation, etc. (optional)
-    public LocalDateTime getEndTime() {
+    public OffsetDateTime getEndTime() {
         return startTime.plusMinutes(durationInMinutes);
     }
 }

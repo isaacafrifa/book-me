@@ -2,8 +2,8 @@ package iam.bookme.repository;
 
 import iam.bookme.AbstractContainerTest;
 import iam.bookme.TestContext;
+import iam.bookme.dto.BookingStatus;
 import iam.bookme.entity.Booking;
-import iam.bookme.enums.BookingStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +16,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,7 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
-class BookingRepositoryTest extends AbstractContainerTest {
+class BookingRepositoryTest
+        extends AbstractContainerTest {
     @Autowired
     private BookingRepository underTest;
     private final TestContext testContext = new TestContext();
@@ -77,9 +80,12 @@ class BookingRepositoryTest extends AbstractContainerTest {
     @Test
     void findAllByStartTimeAfter_shouldFindAllAfterTime() {
         // given
-        LocalDateTime now = LocalDateTime.of(2022, 8, 5, 10, 0);
-        LocalDateTime startTime1 = now.minusDays(0).withHour(9).withMinute(59);
-        LocalDateTime startTime2 = now.plusDays(1).withHour(10).withMinute(10);
+        var localDateTime = LocalDateTime.of(2022, 8, 5, 10, 0);
+        ZoneOffset offset = ZoneOffset.of("+00:00"); // use GMT
+        OffsetDateTime now = localDateTime.atOffset(offset);
+
+        var startTime1 = now.minusDays(0).withHour(9).withMinute(59);
+        var startTime2 = now.plusDays(1).withHour(10).withMinute(10);
         Booking booking1 = new Booking(null, "book1@test.com", null, null, startTime1, 60, BookingStatus.PENDING, null);
         Booking booking2 = new Booking(null, "book2@test.com", null, null, startTime2, 60, BookingStatus.CANCELLED, null);
         underTest.save(booking);
@@ -101,7 +107,10 @@ class BookingRepositoryTest extends AbstractContainerTest {
     @Test
     void findAllByStartTimeAfter_shouldReturnEmptyList_AtExactTime() {
         // given
-        LocalDateTime now = LocalDateTime.of(2022, 8, 5, 10, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(2022, 8, 5, 10, 0);
+        ZoneOffset offset = ZoneOffset.of("+00:00"); // use GMT
+        OffsetDateTime now = localDateTime.atOffset(offset);
+
         Booking booking1 = new Booking(null, "book1@test.com", null, null, now, 60, BookingStatus.PENDING, null);
         underTest.save(booking1);
         // when
@@ -114,7 +123,7 @@ class BookingRepositoryTest extends AbstractContainerTest {
     @Test
     void findAllByStartTimeAfter_shouldReturnEmptyList_ForEmptyDatabase() {
         // Given (no bookings saved in db)
-        LocalDateTime now = LocalDateTime.now();
+        OffsetDateTime now = OffsetDateTime.now();
         // When
         var actual = underTest.findAllByStartTimeAfter(now);
         // Then

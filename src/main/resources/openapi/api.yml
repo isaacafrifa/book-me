@@ -1,21 +1,26 @@
-openapi: 3.1.0
+openapi: 3.0.3
 info:
   title: Booking API
   description: API for managing bookings
-  version: 1.0.0
   contact:
     email: afrifa@example.com
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Booking API
+  url: http://example.com
 servers:
   - url: http://localhost:8080
     description: Local server
-    variables:
-      basePath:
-        default: /api/v1
+tags:
+  - name: bookings
+    description: Operations about bookings
+
 paths:
   /bookings:
     get:
       summary: Get all bookings
       description: Returns a paginated list of all booking entries.
+      operationId: getBookings
       tags:
         - bookings
       parameters:
@@ -39,7 +44,9 @@ paths:
           name: direction
           schema:
             type: string
-            enum: [ asc, desc ]
+            enum:
+              - asc
+              - desc
             default: asc
           description: Sorting direction (defaults to ascending)
           required: false
@@ -47,7 +54,11 @@ paths:
           name: orderBy
           schema:
             type: string
-            enum: [ id, startTime, status ]
+            enum:
+              - id
+              - startTime
+              - createdOn
+              - status
             default: id
           description: Field to sort by e.g., startTime (defaults to id)
           required: false
@@ -57,22 +68,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  content:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/BookingDto'
-                  totalElements:
-                    type: integer
-                    format: int64
-                    description: Total number of bookings
-                    example: 100
-                  totalPages:
-                    type: integer
-                    format: int64
-                    description: Total number of pages
-                    example: 10
+                $ref: '#/components/schemas/BookingsListDto'
         '400':
           description: Bad request (e.g., invalid parameter values)
           content:
@@ -135,6 +131,23 @@ components:
           format: date-time
           description: Timestamp of the error
           example: '2023-05-25T12:34:56.000Z'
-
+    BookingsListDto:
+      description: A paginated list of bookings
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingDto'
+        totalElements:
+          type: integer
+          format: int64
+          description: Total number of bookings
+          example: 100
+        totalPages:
+          type: integer
+          format: int32
+          description: Total number of pages
+          example: 10
 
 

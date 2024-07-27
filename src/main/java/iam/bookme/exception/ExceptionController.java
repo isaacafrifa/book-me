@@ -22,6 +22,8 @@ import java.util.List;
 @RestControllerAdvice
 public class ExceptionController extends ResponseEntityExceptionHandler {
 
+    public static final String INVALID_REQUEST_ARGUMENT = "Invalid request argument";
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<APIError> handleClientNotFoundException(ResourceNotFoundException ex, WebRequest request) {
         APIError errorDetails = new APIError(ex.getMessage(),
@@ -41,7 +43,7 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
             DateTimeException.class})
     public ResponseEntity<Object> handleIllegalArgument(RuntimeException ex, WebRequest request) {
         APIError apiError = new APIError(
-                ex.getLocalizedMessage(), extractPath(request.getDescription(false)));
+                INVALID_REQUEST_ARGUMENT, extractPath(request.getDescription(false)));
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 

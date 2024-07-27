@@ -55,11 +55,12 @@
 		<dependency>
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct</artifactId>
-			<version>1.5.0.Final</version>
+			<version>1.6.0.Beta1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -134,10 +135,13 @@
 							<configOptions>
 								<title>Booking API</title>
 								<serializableModel>true</serializableModel>
-								<interfaceOnly>false</interfaceOnly>
+								<interfaceOnly>true</interfaceOnly>
 								<useSpringBoot3>true</useSpringBoot3>
 								<useTags>true</useTags>
+								<hideGenerationTimestamp>true</hideGenerationTimestamp>
+								<openApiNullable>false</openApiNullable>
 								<useBeanValidation>true</useBeanValidation>
+								<sortParamsByRequiredFlag>true</sortParamsByRequiredFlag>
 							</configOptions>
 							<generateApiTests>false</generateApiTests>
 							<generateModelTests>false</generateModelTests>
@@ -147,7 +151,21 @@
 					</execution>
 				</executions>
 			</plugin>
-
+			<!--			mapstruct-processor is used to generate the mapper implementation during the build-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.11.0</version>
+				<configuration>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.mapstruct</groupId>
+							<artifactId>mapstruct-processor</artifactId>
+							<version>1.6.0.Beta1</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

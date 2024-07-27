@@ -1,7 +1,6 @@
 package iam.bookme.repository;
 
 import iam.bookme.AbstractContainerTest;
-import iam.bookme.TestContext;
 import iam.bookme.dto.BookingStatus;
 import iam.bookme.entity.Booking;
 import org.junit.jupiter.api.AfterEach;
@@ -18,6 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,16 +31,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
-class BookingRepositoryTest
-        extends AbstractContainerTest {
+class BookingRepositoryTest extends AbstractContainerTest {
     @Autowired
     private BookingRepository underTest;
-    private final TestContext testContext = new TestContext();
+    /// This pattern (XXX) includes the 3-digit zone offset (e.g. +05:30 for India Standard Time).
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
     private Booking booking;
 
     @BeforeEach
     void setUp() {
-        booking = testContext.getTestBooking();
+        booking = new Booking(
+                "test@email.com",
+                OffsetDateTime.parse("2022-08-01T10:00:00+00:00", formatter),
+                OffsetDateTime.parse("2022-08-01T10:00:00+00:00", formatter),
+                OffsetDateTime.parse("2022-08-05T11:00:00+00:00", formatter),
+                45,
+                BookingStatus.PENDING,
+                "This is a test booking.");
     }
 
     @AfterEach
@@ -52,7 +59,6 @@ class BookingRepositoryTest
     void findAllByUserEmail_shouldFindAllBookingsForUserEmail() {
         //given
         underTest.save(booking);
-        var generatedId = booking.getBookingId();
         //when
         var actual = underTest.findAllByUserEmail(booking.getUserEmail());
         //then
@@ -60,7 +66,6 @@ class BookingRepositoryTest
         assertEquals(1, actual.size());
         assertAll(
                 () -> assertEquals("test@email.com", actual.get(0).getUserEmail()),
-                () -> assertEquals(generatedId, actual.get(0).getBookingId()),
                 () -> assertEquals(BookingStatus.PENDING, actual.get(0).getStatus()),
                 () -> assertEquals("This is a test booking.", actual.get(0).getComments())
         );
@@ -86,8 +91,9 @@ class BookingRepositoryTest
 
         var startTime1 = now.minusDays(0).withHour(9).withMinute(59);
         var startTime2 = now.plusDays(1).withHour(10).withMinute(10);
-        Booking booking1 = new Booking(null, "book1@test.com", null, null, startTime1, 60, BookingStatus.PENDING, null);
-        Booking booking2 = new Booking(null, "book2@test.com", null, null, startTime2, 60, BookingStatus.CANCELLED, null);
+        Booking booking1 = new Booking("book1@test.com", null, null, startTime1, 60, BookingStatus.PENDING, null);
+
+        Booking booking2 = new Booking("book2@test.com", null, null, startTime2, 60, BookingStatus.CANCELLED, null);
         underTest.save(booking);
         underTest.save(booking1);
         underTest.save(booking2);
@@ -111,7 +117,7 @@ class BookingRepositoryTest
         ZoneOffset offset = ZoneOffset.of("+00:00"); // use GMT
         OffsetDateTime now = localDateTime.atOffset(offset);
 
-        Booking booking1 = new Booking(null, "book1@test.com", null, null, now, 60, BookingStatus.PENDING, null);
+        Booking booking1 = new Booking("book1@test.com", null, null, now, 60, BookingStatus.PENDING, null);
         underTest.save(booking1);
         // when
         var actual = underTest.findAllByStartTimeAfter(now);

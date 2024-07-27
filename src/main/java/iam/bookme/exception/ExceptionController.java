@@ -5,14 +5,18 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.time.DateTimeException;
 import java.util.List;
 
 @RestControllerAdvice
@@ -32,7 +36,15 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
     }
 
-    /* handle validation exceptions */
+    /* This exception is thrown when a client sends a request with an illegal request argument e.g. invalid date format, negative value, etc. */
+    @ExceptionHandler({IllegalArgumentException.class, MethodArgumentTypeMismatchException.class,
+            DateTimeException.class})
+    public ResponseEntity<Object> handleIllegalArgument(RuntimeException ex, WebRequest request) {
+        APIError apiError = new APIError(
+                ex.getLocalizedMessage(), extractPath(request.getDescription(false)));
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         List<String> errors = ex.getBindingResult().getFieldErrors().stream()
@@ -44,19 +56,29 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
     }
 
     /* This exception is thrown when a requested resource cannot be located e.g. user enters an invalid URL path. */
-    @ExceptionHandler({NoResourceFoundException.class})
-    public ResponseEntity<Object> handleNoResourceFoundException(NoResourceFoundException ex, WebRequest request) {
+    @Override
+    protected ResponseEntity<Object> handleNoResourceFoundException(NoResourceFoundException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         APIError apiError = new APIError(
                 ex.getLocalizedMessage(), extractPath(request.getDescription(false)));
-        return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
+        return handleExceptionInternal(ex, apiError, headers, status, request);
     }
 
-    /* This exception hanldes missing or unexpected required content type e.g. request requires 'application/json and receives 'text' */
-    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-    public ResponseEntity<APIError> handleMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException ex, WebRequest request) {
+    /* This exception handles missing or unexpected required content type e.g. request requires 'application/json and receives 'text' */
+    @Override
+    protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         APIError apiError = new APIError(
-                ex.getLocalizedMessage(), extractPath(request.getDescription(false)));
-        return new ResponseEntity<>(apiError, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+                ex.getLocalizedMessage(),
+                extractPath(request.getDescription(false)));
+        return handleExceptionInternal(ex, apiError, headers, status, request);
+    }
+
+    /*    This exception is thrown when a client sends a request with an unsupported HTTP method e.g. PUT, DELETE, etc. */
+    @Override
+    protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex, @NonNull HttpHeaders headers, @NonNull HttpStatusCode status, WebRequest request) {
+        APIError apiError = new APIError(
+                ex.getLocalizedMessage(),
+                extractPath(request.getDescription(false)));
+        return handleExceptionInternal(ex, apiError, headers, status, request);
     }
 
     @ExceptionHandler({Exception.class})

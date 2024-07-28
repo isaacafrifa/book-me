@@ -81,6 +81,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/APIError'
+    post:
+      summary: Create a new booking
+      description: Creates a new booking entry.
+      operationId: createBooking
+      tags:
+        - bookings
+      requestBody:
+        description: Booking object that needs to be added
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingRequestDto'
+      responses:
+        '201':
+          description: Booking created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDto'
+        '400':
+          description: Bad request (e.g., invalid input)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '409':
+          description: Conflict (e.g., booking conflicts with existing entries)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+
   /bookings/{id}:
     get:
       summary: Get a booking by ID
@@ -154,7 +193,29 @@ components:
         - Pending
         - Confirmed
         - Cancelled
-      #  enum: [ PENDING, CONFIRMED, CANCELLED ]
+    BookingRequestDto:
+      type: object
+      required:
+        - userEmail
+        - startTime
+      properties:
+        userEmail:
+          type: string
+          pattern: ^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$
+          format: email
+          description: Email address of the user
+          example: user@example.com
+          minLength: 6
+        startTime:
+          type: string
+          format: date-time
+          description: Start time of the booking
+          example: '2023-05-25T10:00:00.000Z'
+        comments:
+          type: string
+          pattern: ^.{0,150}$
+          description: Comments about the booking (max 150 characters)
+          example: 'Special reservation for 4 persons'
     APIError:
       type: object
       properties:

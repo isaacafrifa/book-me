@@ -2,6 +2,10 @@ package iam.bookme.service;
 
 import iam.bookme.dto.BookingDto;
 import iam.bookme.dto.BookingMapper;
+import iam.bookme.dto.BookingRequestDto;
+import iam.bookme.dto.BookingStatusDto;
+import iam.bookme.entity.Booking;
+import iam.bookme.exception.ResourceAlreadyExistsException;
 import iam.bookme.exception.ResourceNotFoundException;
 import iam.bookme.mapper.OrderByFieldMapper;
 import iam.bookme.repository.BookingRepository;
@@ -54,15 +58,18 @@ public class BookingService {
                 .map(bookingMapper::toDto)
                 .orElseThrow(() -> new ResourceNotFoundException(BOOKING_NOT_FOUND_MESSAGE));
     }
-//
-//    public BookingDto createBooking(BookingDto bookingDto) {
-//        if (Boolean.TRUE.equals(bookingRepository.existsByUserEmailIgnoreCase(bookingDto.getUserEmail()))) {
-//            log.info("Booking [user email: {}] already exists", bookingDto.getUserEmail());
-//            throw new ResourceAlreadyExistsException(BOOKING_ALREADY_EXISTS_MESSAGE);
-//        }
-//        Booking toBeSaved = bookingMapper.toEntity(bookingDto);
-//        return bookingMapper.toDto(bookingRepository.save(toBeSaved));
-//    }
+
+    public BookingDto createBooking(BookingRequestDto bookingRequestDto) {
+        if (Boolean.TRUE.equals(bookingRepository.existsByUserEmailIgnoreCase(bookingRequestDto.getUserEmail()))) {
+            log.info("Booking [user email: {}] already exists", bookingRequestDto.getUserEmail());
+            throw new ResourceAlreadyExistsException(BOOKING_ALREADY_EXISTS_MESSAGE);
+        }
+        Booking toBeSaved = bookingMapper.toEntity(bookingRequestDto);
+        setDefaultsToBooking(toBeSaved);
+        var saved = bookingRepository.save(toBeSaved);
+        return bookingMapper.toDto(saved);
+    }
+
 //
 //    public BookingDto updateBooking(UUID bookingId, BookingDto bookingDto) {
 //        var existingBooking = getExistingBooking(bookingId);
@@ -98,5 +105,11 @@ public class BookingService {
         assert direction != null;
         if (direction.contains("desc")) return Sort.Direction.DESC;
         return Sort.Direction.ASC;
+    }
+
+    private void setDefaultsToBooking(Booking toBeSaved) {
+        final int DEFAULT_DURATION_IN_MINUTES = 45;
+        toBeSaved.setStatus(BookingStatusDto.PENDING);
+        toBeSaved.setDurationInMinutes(DEFAULT_DURATION_IN_MINUTES);
     }
 }

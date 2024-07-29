@@ -183,10 +183,10 @@ components:
           type: string
           format: date-time
         bookingStatus:
-          $ref: '#/components/schemas/BookingStatus'
+          $ref: '#/components/schemas/BookingStatusDto'
         comments:
           type: string
-    BookingStatus:
+    BookingStatusDto:
       type: string
       description: The status of the booking
       enum:

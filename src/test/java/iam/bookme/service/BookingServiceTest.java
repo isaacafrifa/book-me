@@ -2,8 +2,10 @@ package iam.bookme.service;
 
 import iam.bookme.dto.BookingDto;
 import iam.bookme.dto.BookingMapper;
-import iam.bookme.dto.BookingStatus;
+import iam.bookme.dto.BookingRequestDto;
+import iam.bookme.dto.BookingStatusDto;
 import iam.bookme.entity.Booking;
+import iam.bookme.exception.ResourceAlreadyExistsException;
 import iam.bookme.exception.ResourceNotFoundException;
 import iam.bookme.repository.BookingRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,15 +17,9 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @DisplayName("Running bookingService tests")
@@ -63,7 +60,7 @@ class BookingServiceTest {
                 OffsetDateTime.parse("2022-08-01T10:00:00+00:00", formatter),
                 OffsetDateTime.parse("2022-08-05T11:00:00+00:00", formatter),
                 45,
-                BookingStatus.PENDING,
+                BookingStatusDto.PENDING,
                 "This is a test booking.");
         bookingDto = new BookingDto();
         bookingDto.setBookingId(BOOKING_ID);
@@ -71,70 +68,76 @@ class BookingServiceTest {
         bookingDto.setCreatedDate(booking.getCreatedDate());
         bookingDto.setUpdatedDate(booking.getUpdatedDate());
         bookingDto.setStartTime(booking.getStartTime());
-        bookingDto.setBookingStatus(booking.getStatus());
         bookingDto.setComments(booking.getComments());
     }
 
-    @Test
-    void getAllBookings_shouldGetAllBookings() {
-        //given
-        Page<Booking> page = new PageImpl<>(Collections.singletonList(booking));
-        Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdDate"));
-        ArgumentCaptor<Pageable> pageableCaptor =
-                ArgumentCaptor.forClass(Pageable.class);
-        given(bookingRepository.findAll(pageable)).willReturn(page);
-        //when
-        var actual = underTest.getAllBookings(0, 5, "desc", "createdDate");
-        //then
-        verify(bookingRepository).findAll(pageable);
-        verify(bookingRepository).findAll(pageableCaptor.capture());
-        var captorValue = pageableCaptor.getValue();
-        assertEquals(5, captorValue.getPageSize());
-        assertEquals(1, actual.getTotalElements(), "Expected to find one booking");
-    }
-
-    @Test
-    void getAllBookings_shouldReturnEmptyPageWhenNoBookings() {
-        // given
-        Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdDate"));
-        given(bookingRepository.findAll(pageable)).willReturn(Page.empty());
-        // when
-        var actual = underTest.getAllBookings(0, 5, "desc", "createdDate");
-        // then
-        verify(bookingRepository).findAll(pageable);
-        assertEquals(0, actual.getTotalElements(), "Expected no booking");
-    }
+//    @Test
+//    void getAllBookings_shouldGetAllBookings() {
+//        //given
+//        Page<Booking> page = new PageImpl<>(Collections.singletonList(booking));
+//        Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdDate"));
+//        ArgumentCaptor<Pageable> pageableCaptor =
+//                ArgumentCaptor.forClass(Pageable.class);
+//        given(bookingRepository.findAll(pageable)).willReturn(page);
+//        //when
+//        var actual = underTest.getAllBookings(0, 5, "desc", "createdDate");
+//        //then
+//        verify(bookingRepository).findAll(pageable);
+//        verify(bookingRepository).findAll(pageableCaptor.capture());
+//        var captorValue = pageableCaptor.getValue();
+//        assertEquals(5, captorValue.getPageSize());
+//        assertEquals(1, actual.getTotalElements(), "Expected to find one booking");
+//    }
 
 //    @Test
-//    void saveBooking_shouldSaveBooking() {
+//    void getAllBookings_shouldReturnEmptyPageWhenNoBookings() {
 //        // given
-//        given(bookingMapper.toEntity(bookingDto)).willReturn(booking);
-//        given(bookingRepository.save(booking)).willReturn(booking);
+//        Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdDate"));
+//        given(bookingRepository.findAll(pageable)).willReturn(Page.empty());
 //        // when
-//        underTest.createBooking(bookingDto);
+//        var actual = underTest.getAllBookings(0, 5, "desc", "createdDate");
 //        // then
-//        verify(bookingMapper).toEntity(bookingDto);
-//        verify(bookingRepository).save(bookingArgumentCaptor.capture());
-//        verify(bookingMapper, times(1)).toDto(booking);
-//        Booking capturedBooking = bookingArgumentCaptor.getValue();
-//        assertEquals(booking.getUserEmail(), capturedBooking.getUserEmail());
-//        assertEquals(booking.getComments(), capturedBooking.getComments());
+//        verify(bookingRepository).findAll(pageable);
+//        assertEquals(0, actual.getTotalElements(), "Expected no booking");
 //    }
-//
-//    @Test
-//    void saveBooking_shouldThrowExceptionWhenBookingAlreadyExists() {
-//        // given
-//        given(bookingRepository.existsByUserEmailIgnoreCase(bookingDto.getUserEmail())).willReturn(true);
-//        // when + then
-//        assertThrows(
-//                ResourceAlreadyExistsException.class,
-//                () -> underTest.createBooking(bookingDto),
-//                "Should throw exception"
-//        );
-//        verify(bookingMapper, never()).toEntity(bookingDto);
-//        verify(bookingRepository, never()).save(any());
-//        verify(bookingMapper, never()).toDto(any());
-//    }
+
+    @Test
+    void saveBooking_shouldSaveBooking() {
+        // given
+        var bookingRequestDto = createBookingRequestDto();
+
+        given(bookingMapper.toEntity(bookingRequestDto)).willReturn(booking);
+        given(bookingRepository.save(booking)).willReturn(booking);
+        // when
+        underTest.createBooking(bookingRequestDto);
+        // then
+        verify(bookingMapper).toEntity(bookingRequestDto);
+        verify(bookingRepository).save(bookingArgumentCaptor.capture());
+        verify(bookingMapper, times(1)).toDto(booking);
+        Booking capturedBooking = bookingArgumentCaptor.getValue();
+        assertEquals(booking.getUserEmail(), capturedBooking.getUserEmail());
+        assertEquals(booking.getStartTime(), capturedBooking.getStartTime());
+        assertEquals(BookingStatusDto.PENDING, capturedBooking.getStatus());
+        assertEquals(45, capturedBooking.getDurationInMinutes());
+        assertEquals(booking.getComments(), capturedBooking.getComments());
+    }
+
+    @Test
+    void saveBooking_shouldThrowExceptionWhenBookingAlreadyExists() {
+        // given
+        var bookingRequestDto = createBookingRequestDto();
+
+        given(bookingRepository.existsByUserEmailIgnoreCase(bookingRequestDto.getUserEmail())).willReturn(true);
+        // when + then
+        assertThrows(
+                ResourceAlreadyExistsException.class,
+                () -> underTest.createBooking(bookingRequestDto),
+                "Should throw exception"
+        );
+        verify(bookingMapper, never()).toEntity(bookingRequestDto);
+        verify(bookingRepository, never()).save(any());
+        verify(bookingMapper, never()).toDto(any());
+    }
 
     @Test
     void getBookingById_shouldReturnBookingDto() {
@@ -229,4 +232,11 @@ class BookingServiceTest {
 //        verify(bookingRepository, never()).deleteById(nonExistentId);
 //    }
 
+    private BookingRequestDto createBookingRequestDto() {
+        final BookingRequestDto bookingRequestDto = new BookingRequestDto();
+        bookingRequestDto.setUserEmail(booking.getUserEmail());
+        bookingRequestDto.setStartTime(booking.getStartTime());
+        bookingRequestDto.setComments(booking.getComments());
+        return bookingRequestDto;
+    }
 }

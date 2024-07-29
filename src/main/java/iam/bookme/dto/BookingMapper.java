@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface BookingMapper {
-    Booking toEntity(BookingDto bookingDto);
+    Booking toEntity(BookingRequestDto bookingRequestDto);
 
     BookingDto toDto(Booking booking);
 }

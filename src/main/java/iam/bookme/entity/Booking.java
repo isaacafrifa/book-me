@@ -89,7 +89,7 @@ public class Booking {
         return durationInMinutes;
     }
 
-    public BookingStatusDto getStatus() {
+    public BookingStatusDto getBookingStatus() {
         return status;
     }
 

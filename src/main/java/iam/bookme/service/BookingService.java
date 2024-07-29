@@ -67,6 +67,7 @@ public class BookingService {
         Booking toBeSaved = bookingMapper.toEntity(bookingRequestDto);
         setDefaultsToBooking(toBeSaved);
         var saved = bookingRepository.save(toBeSaved);
+        log.info("Booking [id: {}] created successfully", saved.getBookingId());
         return bookingMapper.toDto(saved);
     }
 

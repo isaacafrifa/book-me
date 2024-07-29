@@ -117,7 +117,7 @@ class BookingServiceTest {
         Booking capturedBooking = bookingArgumentCaptor.getValue();
         assertEquals(booking.getUserEmail(), capturedBooking.getUserEmail());
         assertEquals(booking.getStartTime(), capturedBooking.getStartTime());
-        assertEquals(BookingStatusDto.PENDING, capturedBooking.getStatus());
+        assertEquals(BookingStatusDto.PENDING, capturedBooking.getBookingStatus());
         assertEquals(45, capturedBooking.getDurationInMinutes());
         assertEquals(booking.getComments(), capturedBooking.getComments());
     }

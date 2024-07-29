@@ -66,7 +66,7 @@ class BookingRepositoryTest extends AbstractContainerTest {
         assertEquals(1, actual.size());
         assertAll(
                 () -> assertEquals("test@email.com", actual.get(0).getUserEmail()),
-                () -> assertEquals(BookingStatusDto.PENDING, actual.get(0).getStatus()),
+                () -> assertEquals(BookingStatusDto.PENDING, actual.get(0).getBookingStatus()),
                 () -> assertEquals("This is a test booking.", actual.get(0).getComments())
         );
     }

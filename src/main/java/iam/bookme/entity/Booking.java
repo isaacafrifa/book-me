@@ -1,6 +1,6 @@
 package iam.bookme.entity;
 
-import iam.bookme.dto.BookingStatus;
+import iam.bookme.dto.BookingStatusDto;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
@@ -11,9 +11,9 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.OffsetDateTime;
@@ -31,15 +31,20 @@ public class Booking {
     private UUID bookingId;
 
     private String userEmail;
-    @CreatedDate
+    /*
+     Using `@CreationTimestamp` and `@UpdateTimestamp` instead of `@CreatedDate` and `@LastModifiedDate`.
+     While `@CreatedDate` and `@LastModifiedDate` typically expect data types like `LocalDateTime` or `Date`, they do not handle `OffsetDateTime` correctly due to the included offset.
+    `@CreationTimestamp` and `@UpdateTimestamp` are specifically designed to manage timestamps, including those with time zones.
+     */
+    @CreationTimestamp
     private OffsetDateTime createdDate;
-    @LastModifiedDate
+    @UpdateTimestamp
     private OffsetDateTime updatedDate;
     private OffsetDateTime startTime;
     private int durationInMinutes; // Duration of the booking in minutes
 
     @Enumerated(EnumType.STRING)
-    private BookingStatus status;
+    private BookingStatusDto status;
 
     private String comments;
 
@@ -50,7 +55,7 @@ public class Booking {
     }
 
     // Custom constructor excluding bookingId
-    public Booking(String userEmail, OffsetDateTime createdDate, OffsetDateTime updatedDate, OffsetDateTime startTime, int durationInMinutes, BookingStatus status, String comments) {
+    public Booking(String userEmail, OffsetDateTime createdDate, OffsetDateTime updatedDate, OffsetDateTime startTime, int durationInMinutes, BookingStatusDto status, String comments) {
         this.userEmail = userEmail;
         this.createdDate = createdDate;
         this.updatedDate = updatedDate;
@@ -84,11 +89,19 @@ public class Booking {
         return durationInMinutes;
     }
 
-    public BookingStatus getStatus() {
+    public BookingStatusDto getStatus() {
         return status;
     }
 
     public String getComments() {
         return comments;
+    }
+
+    public void setStatus(BookingStatusDto status) {
+        this.status = status;
+    }
+
+    public void setDurationInMinutes(int durationInMinutes) {
+        this.durationInMinutes = durationInMinutes;
     }
 }

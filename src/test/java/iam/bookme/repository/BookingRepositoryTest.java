@@ -1,7 +1,7 @@
 package iam.bookme.repository;
 
 import iam.bookme.AbstractContainerTest;
-import iam.bookme.dto.BookingStatus;
+import iam.bookme.dto.BookingStatusDto;
 import iam.bookme.entity.Booking;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +46,7 @@ class BookingRepositoryTest extends AbstractContainerTest {
                 OffsetDateTime.parse("2022-08-01T10:00:00+00:00", formatter),
                 OffsetDateTime.parse("2022-08-05T11:00:00+00:00", formatter),
                 45,
-                BookingStatus.PENDING,
+                BookingStatusDto.PENDING,
                 "This is a test booking.");
     }
 
@@ -66,7 +66,7 @@ class BookingRepositoryTest extends AbstractContainerTest {
         assertEquals(1, actual.size());
         assertAll(
                 () -> assertEquals("test@email.com", actual.get(0).getUserEmail()),
-                () -> assertEquals(BookingStatus.PENDING, actual.get(0).getStatus()),
+                () -> assertEquals(BookingStatusDto.PENDING, actual.get(0).getStatus()),
                 () -> assertEquals("This is a test booking.", actual.get(0).getComments())
         );
     }
@@ -91,9 +91,9 @@ class BookingRepositoryTest extends AbstractContainerTest {
 
         var startTime1 = now.minusDays(0).withHour(9).withMinute(59);
         var startTime2 = now.plusDays(1).withHour(10).withMinute(10);
-        Booking booking1 = new Booking("book1@test.com", null, null, startTime1, 60, BookingStatus.PENDING, null);
+        Booking booking1 = new Booking("book1@test.com", null, null, startTime1, 60, BookingStatusDto.PENDING, null);
 
-        Booking booking2 = new Booking("book2@test.com", null, null, startTime2, 60, BookingStatus.CANCELLED, null);
+        Booking booking2 = new Booking("book2@test.com", null, null, startTime2, 60, BookingStatusDto.CANCELLED, null);
         underTest.save(booking);
         underTest.save(booking1);
         underTest.save(booking2);
@@ -117,7 +117,7 @@ class BookingRepositoryTest extends AbstractContainerTest {
         ZoneOffset offset = ZoneOffset.of("+00:00"); // use GMT
         OffsetDateTime now = localDateTime.atOffset(offset);
 
-        Booking booking1 = new Booking("book1@test.com", null, null, now, 60, BookingStatus.PENDING, null);
+        Booking booking1 = new Booking("book1@test.com", null, null, now, 60, BookingStatusDto.PENDING, null);
         underTest.save(booking1);
         // when
         var actual = underTest.findAllByStartTimeAfter(now);

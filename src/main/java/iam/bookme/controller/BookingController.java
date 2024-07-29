@@ -1,10 +1,12 @@
 package iam.bookme.controller;
 
 import iam.bookme.dto.BookingDto;
+import iam.bookme.dto.BookingRequestDto;
 import iam.bookme.dto.BookingsListDto;
 import iam.bookme.service.BookingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,5 +41,13 @@ public class BookingController implements BookingsApi {
         var response = bookingService.getBookingById(id);
         return ResponseEntity.ok(response);
     }
+
+    @Override
+    public ResponseEntity<BookingDto> createBooking(BookingRequestDto bookingRequestDto) {
+        log.debug("Received request to create booking {}", bookingRequestDto);
+        var response = bookingService.createBooking(bookingRequestDto);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
 
 }

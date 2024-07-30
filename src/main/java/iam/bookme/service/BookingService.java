@@ -4,6 +4,7 @@ import iam.bookme.dto.BookingDto;
 import iam.bookme.dto.BookingMapper;
 import iam.bookme.dto.BookingRequestDto;
 import iam.bookme.dto.BookingStatusDto;
+import iam.bookme.dto.validation.BookingValidationService;
 import iam.bookme.entity.Booking;
 import iam.bookme.exception.ResourceAlreadyExistsException;
 import iam.bookme.exception.ResourceNotFoundException;
@@ -28,11 +29,13 @@ public class BookingService {
     public static final String BOOKING_ALREADY_EXISTS_MESSAGE = "Booking already exists";
     private static final String DEFAULT_ORDER_BY_FIELD = "bookingId";
     private final OrderByFieldMapper orderByFieldMapper = new OrderByFieldMapper();
+    private final BookingValidationService bookingValidationService;
     private final Logger log = LoggerFactory.getLogger(BookingService.class);
 
-    public BookingService(BookingRepository bookingRepository, BookingMapper bookingMapper) {
+    public BookingService(BookingRepository bookingRepository, BookingMapper bookingMapper, BookingValidationService bookingValidationService) {
         this.bookingRepository = bookingRepository;
         this.bookingMapper = bookingMapper;
+        this.bookingValidationService = bookingValidationService;
         // map the user-provided field to db field
         orderByFieldMapper.setDefaultValue(DEFAULT_ORDER_BY_FIELD);
         orderByFieldMapper.addMapping("id", DEFAULT_ORDER_BY_FIELD);
@@ -60,6 +63,9 @@ public class BookingService {
     }
 
     public BookingDto createBooking(BookingRequestDto bookingRequestDto) {
+        log.info("Create booking '{}'", bookingRequestDto);
+
+        bookingValidationService.validateBookingRequestDto(bookingRequestDto);
         if (Boolean.TRUE.equals(bookingRepository.existsByUserEmailIgnoreCase(bookingRequestDto.getUserEmail()))) {
             log.info("Booking [user email: {}] already exists", bookingRequestDto.getUserEmail());
             throw new ResourceAlreadyExistsException(BOOKING_ALREADY_EXISTS_MESSAGE);

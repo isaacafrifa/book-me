@@ -4,6 +4,7 @@ import iam.bookme.dto.BookingDto;
 import iam.bookme.dto.BookingMapper;
 import iam.bookme.dto.BookingRequestDto;
 import iam.bookme.dto.BookingStatusDto;
+import iam.bookme.dto.validation.BookingValidationService;
 import iam.bookme.entity.Booking;
 import iam.bookme.exception.ResourceAlreadyExistsException;
 import iam.bookme.exception.ResourceNotFoundException;
@@ -44,6 +45,8 @@ class BookingServiceTest {
     private BookingRepository bookingRepository;
     @Mock
     private BookingMapper bookingMapper;
+    @Mock
+    private BookingValidationService bookingValidationService;
     private Booking booking;
     private BookingDto bookingDto;
     /// This pattern (XXX) includes the 3-digit zone offset (e.g. +05:30 for India Standard Time).
@@ -112,6 +115,7 @@ class BookingServiceTest {
         underTest.createBooking(bookingRequestDto);
         // then
         verify(bookingMapper).toEntity(bookingRequestDto);
+        verify(bookingValidationService).validateBookingRequestDto(bookingRequestDto);
         verify(bookingRepository).save(bookingArgumentCaptor.capture());
         verify(bookingMapper, times(1)).toDto(booking);
         Booking capturedBooking = bookingArgumentCaptor.getValue();
@@ -137,6 +141,7 @@ class BookingServiceTest {
         verify(bookingMapper, never()).toEntity(bookingRequestDto);
         verify(bookingRepository, never()).save(any());
         verify(bookingMapper, never()).toDto(any());
+        verify(bookingValidationService).validateBookingRequestDto(any());
     }
 
     @Test

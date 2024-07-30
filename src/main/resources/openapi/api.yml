@@ -201,11 +201,12 @@ components:
       properties:
         userEmail:
           type: string
-          pattern: ^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$
+          # Ensure valid email format with stricter rules than basic format: email. Pattern is handled in code
           format: email
           description: Email address of the user
           example: user@example.com
-          minLength: 6
+          minLength: 10
+          maxLength: 50
         startTime:
           type: string
           format: date-time

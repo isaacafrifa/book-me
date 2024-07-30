@@ -4,6 +4,7 @@ import iam.bookme.dto.BookingDto;
 import iam.bookme.dto.BookingRequestDto;
 import iam.bookme.dto.BookingsListDto;
 import iam.bookme.service.BookingService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -43,7 +44,7 @@ public class BookingController implements BookingsApi {
     }
 
     @Override
-    public ResponseEntity<BookingDto> createBooking(BookingRequestDto bookingRequestDto) {
+    public ResponseEntity<BookingDto> createBooking(@Valid BookingRequestDto bookingRequestDto) {
         log.debug("Received request to create booking {}", bookingRequestDto);
         var response = bookingService.createBooking(bookingRequestDto);
         return new ResponseEntity<>(response, HttpStatus.CREATED);

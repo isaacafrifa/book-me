@@ -9,8 +9,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -22,8 +20,6 @@ import java.util.UUID;
 @Entity
 @Table
 @EntityListeners(AuditingEntityListener.class)
-@NoArgsConstructor
-@Setter
 public class Booking {
     @Id
     @GeneratedValue(generator = "UUID")
@@ -52,6 +48,9 @@ public class Booking {
     @Transient
     public OffsetDateTime getEndTime() {
         return startTime.plusMinutes(durationInMinutes);
+    }
+
+    public Booking() {
     }
 
     // Custom constructor excluding bookingId
@@ -103,5 +102,17 @@ public class Booking {
 
     public void setDurationInMinutes(int durationInMinutes) {
         this.durationInMinutes = durationInMinutes;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
+    }
+
+    public void setStartTime(OffsetDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
     }
 }

@@ -214,28 +214,27 @@ class BookingServiceTest {
 //                "Should throw an exception");
 //    }
 //
-//    @Test
-//    void deleteBooking_shouldDeleteBooking() {
-//        // given
-//        UUID bookingId = TestContext.bookingId;
-//        given(bookingRepository.existsById(any())).willReturn(true);
-//        // when
-//        underTest.deleteBooking(bookingId);
-//        // then
-//        verify(bookingRepository).deleteById(bookingId);
-//    }
-//
-//    @Test
-//    void deleteBooking_shouldThrowExceptionForNonexistentId() {
-//        // given
-//        UUID nonExistentId = UUID.randomUUID();
-//        given(bookingRepository.existsById(nonExistentId)).willReturn(false);
-//        // when + then
-//        assertThrows(ResourceNotFoundException.class,
-//                () -> underTest.deleteBooking(nonExistentId),
-//                "Should throw an exception");
-//        verify(bookingRepository, never()).deleteById(nonExistentId);
-//    }
+@Test
+void deleteBooking_shouldDeleteBooking() {
+    // given
+    given(bookingRepository.existsById(any())).willReturn(true);
+    // when
+    underTest.deleteBooking(BOOKING_ID);
+    // then
+    verify(bookingRepository).deleteById(BOOKING_ID);
+}
+
+    @Test
+    void deleteBooking_shouldThrowExceptionForNonexistentId() {
+        // given
+        UUID nonExistentId = UUID.randomUUID();
+        given(bookingRepository.existsById(nonExistentId)).willReturn(false);
+        // when + then
+        assertThrows(ResourceNotFoundException.class,
+                () -> underTest.deleteBooking(nonExistentId),
+                "Should throw an exception");
+        verify(bookingRepository, never()).deleteById(nonExistentId);
+    }
 
     private BookingRequestDto createBookingRequestDto() {
         final BookingRequestDto bookingRequestDto = new BookingRequestDto();

@@ -50,5 +50,11 @@ public class BookingController implements BookingsApi {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @Override
+    public ResponseEntity<Void> deleteBooking(UUID id) {
+        log.debug("Received request to delete booking with id {}", id);
+        bookingService.deleteBooking(id);
+        return ResponseEntity.noContent().build();
+    }
 
 }

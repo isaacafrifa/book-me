@@ -18,9 +18,15 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -75,35 +81,35 @@ class BookingServiceTest {
         bookingDto.setComments(booking.getComments());
     }
 
-//    @Test
-//    void getAllBookings_shouldGetAllBookings() {
-//        //given
-//        Page<Booking> page = new PageImpl<>(Collections.singletonList(booking));
-//        Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdDate"));
-//        ArgumentCaptor<Pageable> pageableCaptor =
-//                ArgumentCaptor.forClass(Pageable.class);
-//        given(bookingRepository.findAll(pageable)).willReturn(page);
-//        //when
-//        var actual = underTest.getAllBookings(0, 5, "desc", "createdDate");
-//        //then
-//        verify(bookingRepository).findAll(pageable);
-//        verify(bookingRepository).findAll(pageableCaptor.capture());
-//        var captorValue = pageableCaptor.getValue();
-//        assertEquals(5, captorValue.getPageSize());
-//        assertEquals(1, actual.getTotalElements(), "Expected to find one booking");
-//    }
+    @Test
+    void getAllBookings_shouldGetAllBookings() {
+        //given
+        Page<Booking> page = new PageImpl<>(Collections.singletonList(booking));
+        Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdDate"));
+        ArgumentCaptor<Pageable> pageableCaptor =
+                ArgumentCaptor.forClass(Pageable.class);
+        given(bookingRepository.findAll(pageable)).willReturn(page);
+        //when
+        var actual = underTest.getAllBookings(0, 5, "desc", "createdOn");
+        //then
+        verify(bookingRepository).findAll(pageable);
+        verify(bookingRepository).findAll(pageableCaptor.capture());
+        var captorValue = pageableCaptor.getValue();
+        assertEquals(5, captorValue.getPageSize());
+        assertEquals(1, actual.getTotalElements(), "Expected to find one booking");
+    }
 
-//    @Test
-//    void getAllBookings_shouldReturnEmptyPageWhenNoBookings() {
-//        // given
-//        Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdDate"));
-//        given(bookingRepository.findAll(pageable)).willReturn(Page.empty());
-//        // when
-//        var actual = underTest.getAllBookings(0, 5, "desc", "createdDate");
-//        // then
-//        verify(bookingRepository).findAll(pageable);
-//        assertEquals(0, actual.getTotalElements(), "Expected no booking");
-//    }
+    @Test
+    void getAllBookings_shouldReturnEmptyPageWhenNoBookings() {
+        // given
+        Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdDate"));
+        given(bookingRepository.findAll(pageable)).willReturn(Page.empty());
+        // when
+        var actual = underTest.getAllBookings(0, 5, "desc", "createdOn");
+        // then
+        verify(bookingRepository).findAll(pageable);
+        assertEquals(0, actual.getTotalElements(), "Expected no booking");
+    }
 
     @Test
     void saveBooking_shouldSaveBooking() {

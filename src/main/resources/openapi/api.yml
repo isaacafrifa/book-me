@@ -253,6 +253,8 @@ components:
           format: uuid
         userEmail:
           type: string
+          format: email
+          example: user@example.com
         createdDate:
           type: string
           format: date-time

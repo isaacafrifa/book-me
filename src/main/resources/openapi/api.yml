@@ -160,6 +160,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/APIError'
+    put:
+      summary: Update a booking by ID
+      description: Updates an existing booking entry by its ID.
+      operationId: updateBooking
+      tags:
+        - bookings
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: ID of the booking to update
+      requestBody:
+        description: Booking object that needs to be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingDto'
+      responses:
+        '200':
+          description: Booking updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDto'
+        '400':
+          description: Bad request (e.g., invalid input)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '404':
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
     delete:
       summary: Delete a booking by ID
       description: Deletes a booking entry by its ID.

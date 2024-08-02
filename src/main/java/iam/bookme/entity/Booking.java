@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import jakarta.persistence.Version;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -43,6 +44,9 @@ public class Booking {
     private BookingStatusDto status;
 
     private String comments;
+
+    @Version
+    private Long version;
 
     // Additional methods for calculating endTime, validation, etc. (optional)
     @Transient

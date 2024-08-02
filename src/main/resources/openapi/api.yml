@@ -160,7 +160,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/APIError'
-
+    delete:
+      summary: Delete a booking by ID
+      description: Deletes a booking entry by its ID.
+      operationId: deleteBooking
+      tags:
+        - bookings
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: ID of the booking to delete
+      responses:
+        '200':
+          description: Booking deleted successfully
+        '400':
+          description: Bad request (e.g., invalid ID format)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '404':
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
 
 
 components:

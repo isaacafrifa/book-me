@@ -89,24 +89,25 @@ public class BookingService {
 //        return bookingMapper.toDto(bookingRepository.save(existingBooking));
 //    }
 //
-//    public void deleteBooking(UUID bookingId) {
-//        if (!bookingRepository.existsById(bookingId)) {
-//            log.info("Booking with id {} not found", bookingId);
-//            throw new ResourceNotFoundException(BOOKING_NOT_FOUND_MESSAGE);
-//        }
-//        bookingRepository.deleteById(bookingId);
-//        log.info("Booking with id {} deleted successfully", bookingId);
-//    }
-//
-//
-//    private Booking getExistingBooking(UUID bookingId) {
-//        return bookingRepository
-//                .findById(bookingId).
-//                orElseThrow(() -> {
-//                    log.info("Booking with id {} not found", bookingId);
-//                    return new ResourceNotFoundException(BOOKING_NOT_FOUND_MESSAGE);
-//                });
-//    }
+public void deleteBooking(UUID bookingId) {
+    log.info("Delete booking with id '{}'", bookingId);
+    if (!bookingRepository.existsById(bookingId)) {
+        log.info("Booking with id '{}' not found", bookingId);
+        throw new ResourceNotFoundException(BOOKING_NOT_FOUND_MESSAGE);
+    }
+    bookingRepository.deleteById(bookingId);
+    log.info("Booking with id '{}' deleted successfully", bookingId);
+}
+
+
+    private Booking getExistingBooking(UUID bookingId) {
+        return bookingRepository
+                .findById(bookingId).
+                orElseThrow(() -> {
+                    log.info("Booking with id {} not found", bookingId);
+                    return new ResourceNotFoundException(BOOKING_NOT_FOUND_MESSAGE);
+                });
+    }
 
     private Sort.Direction getSortDirection(String direction) {
         assert direction != null;

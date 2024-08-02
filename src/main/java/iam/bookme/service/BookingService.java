@@ -6,10 +6,12 @@ import iam.bookme.dto.BookingRequestDto;
 import iam.bookme.dto.BookingStatusDto;
 import iam.bookme.dto.validation.BookingValidationService;
 import iam.bookme.entity.Booking;
+import iam.bookme.exception.BookingOptimisticLockException;
 import iam.bookme.exception.ResourceAlreadyExistsException;
 import iam.bookme.exception.ResourceNotFoundException;
 import iam.bookme.mapper.OrderByFieldMapper;
 import iam.bookme.repository.BookingRepository;
+import jakarta.persistence.OptimisticLockException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -77,18 +79,26 @@ public class BookingService {
         return bookingMapper.toDto(saved);
     }
 
-//
-//    public BookingDto updateBooking(UUID bookingId, BookingDto bookingDto) {
-//        var existingBooking = getExistingBooking(bookingId);
-//
-//        existingBooking.setUserEmail(bookingDto.getUserEmail());
-//        existingBooking.setStartTime(bookingDto.getStartTime());
-//        // duration isn't updated
-//        existingBooking.setStatus(bookingDto.getStatus());
-//        existingBooking.setComments(bookingDto.getComments());
-//        return bookingMapper.toDto(bookingRepository.save(existingBooking));
-//    }
-//
+    public BookingDto updateBooking(UUID bookingId, BookingDto bookingDto) {
+        log.info("Update booking with id '{}'", bookingId);
+
+        bookingValidationService.validateBookingDto(bookingDto);
+
+        var existingBooking = getExistingBooking(bookingId);
+        setDefaultsToBooking(existingBooking);
+        existingBooking.setUserEmail(bookingDto.getUserEmail());
+        existingBooking.setStartTime(bookingDto.getStartTime());
+        existingBooking.setComments(bookingDto.getComments());
+
+        try {
+            log.info("Booking [id: {}] updated successfully", bookingId);
+            return bookingMapper.toDto(bookingRepository.save(existingBooking));
+        } catch (OptimisticLockException e) {
+            log.error("Optimistic lock exception for booking with id {}", bookingId);
+            throw new BookingOptimisticLockException("Concurrent modification detected. Please ty again");
+        }
+    }
+
 public void deleteBooking(UUID bookingId) {
     log.info("Delete booking with id '{}'", bookingId);
     if (!bookingRepository.existsById(bookingId)) {

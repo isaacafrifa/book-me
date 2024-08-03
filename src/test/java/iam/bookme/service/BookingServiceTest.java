@@ -77,7 +77,7 @@ class BookingServiceTest {
         bookingDto.setCreatedDate(booking.getCreatedDate());
         bookingDto.setUpdatedDate(booking.getUpdatedDate());
         bookingDto.setStartTime(booking.getStartTime());
-        bookingDto.setBookingStatus(booking.getBookingStatus());
+        bookingDto.setBookingStatus(booking.getStatus());
         bookingDto.setComments(booking.getComments());
     }
 
@@ -128,7 +128,7 @@ class BookingServiceTest {
         Booking capturedBooking = bookingArgumentCaptor.getValue();
         assertEquals(booking.getUserEmail(), capturedBooking.getUserEmail());
         assertEquals(booking.getStartTime(), capturedBooking.getStartTime());
-        assertEquals(BookingStatusDto.PENDING, capturedBooking.getBookingStatus());
+        assertEquals(BookingStatusDto.PENDING, capturedBooking.getStatus());
         assertEquals(45, capturedBooking.getDurationInMinutes());
         assertEquals(booking.getComments(), capturedBooking.getComments());
     }
@@ -205,7 +205,7 @@ class BookingServiceTest {
         Booking capturedBooking = bookingArgumentCaptor.getValue();
         assertEquals(booking.getUserEmail(), capturedBooking.getUserEmail());
         assertEquals(bookingDto.getStartTime(), capturedBooking.getStartTime());
-        assertEquals(bookingDto.getBookingStatus(), capturedBooking.getBookingStatus());
+        assertEquals(bookingDto.getBookingStatus(), capturedBooking.getStatus());
         assertEquals(booking.getComments(), capturedBooking.getComments());
         assertEquals(booking.getDurationInMinutes(), capturedBooking.getDurationInMinutes());
     }

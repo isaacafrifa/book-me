@@ -12,8 +12,7 @@ import iam.bookme.exception.ResourceNotFoundException;
 import iam.bookme.mapper.OrderByFieldMapper;
 import iam.bookme.repository.BookingRepository;
 import jakarta.persistence.OptimisticLockException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class BookingService {
 
     private final BookingRepository bookingRepository;
@@ -32,7 +32,6 @@ public class BookingService {
     private static final String DEFAULT_ORDER_BY_FIELD = "bookingId";
     private final OrderByFieldMapper orderByFieldMapper = new OrderByFieldMapper();
     private final BookingValidationService bookingValidationService;
-    private final Logger log = LoggerFactory.getLogger(BookingService.class);
 
     public BookingService(BookingRepository bookingRepository, BookingMapper bookingMapper, BookingValidationService bookingValidationService) {
         this.bookingRepository = bookingRepository;

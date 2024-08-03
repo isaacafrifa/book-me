@@ -5,8 +5,7 @@ import iam.bookme.dto.BookingRequestDto;
 import iam.bookme.dto.BookingsListDto;
 import iam.bookme.service.BookingService;
 import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,10 +15,10 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class BookingController implements BookingsApi {
 
     private final BookingService bookingService;
-    private final Logger log = LoggerFactory.getLogger(BookingController.class);
 
     public BookingController(BookingService bookingService) {
         this.bookingService = bookingService;

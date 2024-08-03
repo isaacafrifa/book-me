@@ -10,6 +10,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -21,6 +24,9 @@ import java.util.UUID;
 @Entity
 @Table
 @EntityListeners(AuditingEntityListener.class)
+@Getter
+@Setter
+@NoArgsConstructor
 public class Booking {
     @Id
     @GeneratedValue(generator = "UUID")
@@ -54,9 +60,6 @@ public class Booking {
         return startTime.plusMinutes(durationInMinutes);
     }
 
-    public Booking() {
-    }
-
     // Custom constructor excluding bookingId
     public Booking(String userEmail, OffsetDateTime createdDate, OffsetDateTime updatedDate, OffsetDateTime startTime, int durationInMinutes, BookingStatusDto status, String comments) {
         this.userEmail = userEmail;
@@ -68,55 +71,4 @@ public class Booking {
         this.comments = comments;
     }
 
-    public UUID getBookingId() {
-        return bookingId;
-    }
-
-    public String getUserEmail() {
-        return userEmail;
-    }
-
-    public OffsetDateTime getCreatedDate() {
-        return createdDate;
-    }
-
-    public OffsetDateTime getUpdatedDate() {
-        return updatedDate;
-    }
-
-    public OffsetDateTime getStartTime() {
-        return startTime;
-    }
-
-    public int getDurationInMinutes() {
-        return durationInMinutes;
-    }
-
-    public BookingStatusDto getBookingStatus() {
-        return status;
-    }
-
-    public String getComments() {
-        return comments;
-    }
-
-    public void setStatus(BookingStatusDto status) {
-        this.status = status;
-    }
-
-    public void setDurationInMinutes(int durationInMinutes) {
-        this.durationInMinutes = durationInMinutes;
-    }
-
-    public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
-    }
-
-    public void setStartTime(OffsetDateTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public void setComments(String comments) {
-        this.comments = comments;
-    }
 }

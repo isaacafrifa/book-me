@@ -9,8 +9,9 @@ This project is under development construction 🚧🛠
 ## Technologies
 
 + Java Spring boot
-+ Test containers
++ Testcontainers
 + Postgres
++ OpenAPI Specification
 + (To Be Filled In)
 
 ## Services

@@ -4,7 +4,7 @@ BookMe manages bookings.
 
 ### Current Status
 
-This project is under development 🚧🛠
+This project is under development construction 🚧🛠
 
 ## Technologies
 
@@ -12,6 +12,11 @@ This project is under development 🚧🛠
 + Test containers
 + Postgres
 + (To Be Filled In)
+
+## Services
+- The services created so far include:
+  + booking-service
+  + user-service 👷🏾🚧
 
 ## Contributing
 

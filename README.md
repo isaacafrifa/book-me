@@ -4,9 +4,9 @@ BookMe manages bookings.
 
 ### Current Status
 
-This project is under development construction 🚧🛠
+This project is currently under development construction 🚧🛠
 
-## Technologies
+## Technologies Used
 
 + Java Spring boot
 + Testcontainers

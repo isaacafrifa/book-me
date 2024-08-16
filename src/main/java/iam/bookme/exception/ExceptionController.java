@@ -25,14 +25,14 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
     public static final String INVALID_REQUEST_ARGUMENT = "Invalid request argument";
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<APIError> handleClientNotFoundException(ResourceNotFoundException ex, WebRequest request) {
+    public ResponseEntity<APIError> handleResourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
         APIError errorDetails = new APIError(ex.getMessage(),
                 extractPath(request.getDescription(false)));
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ResourceAlreadyExistsException.class)
-    public ResponseEntity<APIError> handleClientAlreadyExistsException(ResourceAlreadyExistsException ex, WebRequest request) {
+    public ResponseEntity<APIError> handleResourceAlreadyExistsException(ResourceAlreadyExistsException ex, WebRequest request) {
         APIError errorDetails = new APIError(ex.getMessage(),
                 extractPath(request.getDescription(false)));
         return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);

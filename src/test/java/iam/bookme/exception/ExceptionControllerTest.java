@@ -42,7 +42,7 @@ class ExceptionControllerTest {
         given(request.getDescription(false)).willReturn("uri=" + expectedPath);
 
         // When
-        ResponseEntity<APIError> response = exceptionController.handleClientNotFoundException(ex, request);
+        ResponseEntity<APIError> response = exceptionController.handleResourceNotFoundException(ex, request);
 
         // Then
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -59,7 +59,7 @@ class ExceptionControllerTest {
         ResourceAlreadyExistsException ex = new ResourceAlreadyExistsException(RESOURCE_ALREADY_EXISTS);
 
         // When
-        var response = exceptionController.handleClientAlreadyExistsException(ex, request);
+        var response = exceptionController.handleResourceAlreadyExistsException(ex, request);
 
         // Then
         assertNotNull(response);

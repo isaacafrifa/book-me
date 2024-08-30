@@ -1,6 +1,5 @@
-package iam.bookme.dto.validation;
+package iam.bookme.service;
 
-import iam.bookme.dto.BookingDto;
 import iam.bookme.dto.BookingRequestDto;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -15,10 +14,6 @@ public class BookingValidationService {
     public void validateBookingRequestDto(BookingRequestDto bookingRequestDto) {
         validateEmail(bookingRequestDto.getUserEmail());
         // Add other validation rules as needed
-    }
-
-    public void validateBookingDto(BookingDto bookingDto) {
-        validateEmail(bookingDto.getUserEmail());
     }
 
     private void validateEmail(String email) {

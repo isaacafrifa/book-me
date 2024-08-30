@@ -50,9 +50,9 @@ public class BookingController implements BookingsApi {
     }
 
     @Override
-    public ResponseEntity<BookingDto> updateBooking(UUID id, @Valid BookingDto bookingDto) {
+    public ResponseEntity<BookingDto> updateBooking(UUID id, @Valid BookingRequestDto bookingRequestDto) {
         log.debug("Received request to update booking with id {}", id);
-        var response = bookingService.updateBooking(id, bookingDto);
+        var response = bookingService.updateBooking(id, bookingRequestDto);
         return ResponseEntity.ok(response);
     }
 

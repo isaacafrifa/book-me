@@ -4,7 +4,6 @@ import iam.bookme.dto.BookingDto;
 import iam.bookme.dto.BookingMapper;
 import iam.bookme.dto.BookingRequestDto;
 import iam.bookme.dto.BookingStatusDto;
-import iam.bookme.dto.validation.BookingValidationService;
 import iam.bookme.entity.Booking;
 import iam.bookme.exception.BookingOptimisticLockException;
 import iam.bookme.exception.ResourceAlreadyExistsException;
@@ -78,16 +77,16 @@ public class BookingService {
         return bookingMapper.toDto(saved);
     }
 
-    public BookingDto updateBooking(UUID bookingId, BookingDto bookingDto) {
+    public BookingDto updateBooking(UUID bookingId, BookingRequestDto bookingRequestDto) {
         log.info("Update booking with id '{}'", bookingId);
 
-        bookingValidationService.validateBookingDto(bookingDto);
+        bookingValidationService.validateBookingRequestDto(bookingRequestDto);
 
         var existingBooking = getExistingBooking(bookingId);
         setDefaultsToBooking(existingBooking);
-        existingBooking.setUserEmail(bookingDto.getUserEmail());
-        existingBooking.setStartTime(bookingDto.getStartTime());
-        existingBooking.setComments(bookingDto.getComments());
+        existingBooking.setUserEmail(bookingRequestDto.getUserEmail());
+        existingBooking.setStartTime(bookingRequestDto.getStartTime());
+        existingBooking.setComments(bookingRequestDto.getComments());
 
         try {
             log.info("Booking [id: {}] updated successfully", bookingId);

@@ -60,7 +60,7 @@ paths:
               - createdOn
               - status
             default: id
-          description: Field to sort by e.g., startTime (defaults to id)
+          description: Field to sort (defaults to id). Possible values are id, startTime, createdOn and status
           required: false
       responses:
         '200':
@@ -251,10 +251,11 @@ components:
         bookingId:
           type: string
           format: uuid
-        userEmail:
-          type: string
-          format: email
-          example: user@example.com
+        userId:
+          type: integer
+          format: int64
+          example: 11256
+          description: ID of the user who made the booking
         createdDate:
           type: string
           format: date-time

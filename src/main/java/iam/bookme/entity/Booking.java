@@ -33,7 +33,7 @@ public class Booking {
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private UUID bookingId;
 
-    private String userEmail;
+    private Long userReferenceId;
     /*
      Using `@CreationTimestamp` and `@UpdateTimestamp` instead of `@CreatedDate` and `@LastModifiedDate`.
      While `@CreatedDate` and `@LastModifiedDate` typically expect data types like `LocalDateTime` or `Date`, they do not handle `OffsetDateTime` correctly due to the included offset.
@@ -61,8 +61,8 @@ public class Booking {
     }
 
     // Custom constructor excluding bookingId
-    public Booking(String userEmail, OffsetDateTime createdDate, OffsetDateTime updatedDate, OffsetDateTime startTime, int durationInMinutes, BookingStatusDto status, String comments) {
-        this.userEmail = userEmail;
+    public Booking(Long userReferenceId, OffsetDateTime createdDate, OffsetDateTime updatedDate, OffsetDateTime startTime, int durationInMinutes, BookingStatusDto status, String comments) {
+        this.userReferenceId = userReferenceId;
         this.createdDate = createdDate;
         this.updatedDate = updatedDate;
         this.startTime = startTime;

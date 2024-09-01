@@ -1,10 +1,10 @@
 services:
   postgres:
-    image: postgres:16.1
+    image: postgres:15.0
     container_name: booking_postgres
     restart: unless-stopped
     ports:
-      - 5432
+      - '5432:5432'
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_USER: ${DB_USERNAME}

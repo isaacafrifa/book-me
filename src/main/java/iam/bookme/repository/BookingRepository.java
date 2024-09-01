@@ -13,7 +13,6 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
     // Find bookings starting after a specific time. It can be used to get upcoming bookings
     List<Booking> findAllByStartTimeAfter(OffsetDateTime specifiedTime);
 
-    List<Booking> findAllByUserEmail(String userEmail);
+    List<Booking> findAllByUserReferenceId(Long userId);
 
-    Boolean existsByUserEmailIgnoreCase(String userEmail);
 }

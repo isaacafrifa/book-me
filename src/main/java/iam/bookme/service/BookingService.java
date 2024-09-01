@@ -6,7 +6,6 @@ import iam.bookme.dto.BookingRequestDto;
 import iam.bookme.dto.BookingStatusDto;
 import iam.bookme.entity.Booking;
 import iam.bookme.exception.BookingOptimisticLockException;
-import iam.bookme.exception.ResourceAlreadyExistsException;
 import iam.bookme.exception.ResourceNotFoundException;
 import iam.bookme.mapper.OrderByFieldMapper;
 import iam.bookme.repository.BookingRepository;
@@ -66,10 +65,11 @@ public class BookingService {
         log.info("Create booking '{}'", bookingRequestDto);
 
         bookingValidationService.validateBookingRequestDto(bookingRequestDto);
-        if (Boolean.TRUE.equals(bookingRepository.existsByUserEmailIgnoreCase(bookingRequestDto.getUserEmail()))) {
-            log.info("Booking [user email: {}] already exists", bookingRequestDto.getUserEmail());
-            throw new ResourceAlreadyExistsException(BOOKING_ALREADY_EXISTS_MESSAGE);
-        }
+        // TODO: Change the logic here
+//        if (Boolean.TRUE.equals(bookingRepository.existsByUserEmailIgnoreCase(bookingRequestDto.getUserEmail()))) {
+//            log.info("Booking [user email: {}] already exists", bookingRequestDto.getUserEmail());
+//            throw new ResourceAlreadyExistsException(BOOKING_ALREADY_EXISTS_MESSAGE);
+//        }
         Booking toBeSaved = bookingMapper.toEntity(bookingRequestDto);
         setDefaultsToBooking(toBeSaved);
         var saved = bookingRepository.save(toBeSaved);
@@ -84,9 +84,10 @@ public class BookingService {
 
         var existingBooking = getExistingBooking(bookingId);
         setDefaultsToBooking(existingBooking);
-        existingBooking.setUserEmail(bookingRequestDto.getUserEmail());
-        existingBooking.setStartTime(bookingRequestDto.getStartTime());
-        existingBooking.setComments(bookingRequestDto.getComments());
+        // TODO: CHECK THE LOGIC HERE
+//        existingBooking.setUserEmail(bookingRequestDto.getUserEmail());
+//        existingBooking.setStartTime(bookingRequestDto.getStartTime());
+//        existingBooking.setComments(bookingRequestDto.getComments());
 
         try {
             log.info("Booking [id: {}] updated successfully", bookingId);

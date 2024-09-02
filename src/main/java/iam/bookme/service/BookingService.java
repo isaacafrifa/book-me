@@ -1,9 +1,11 @@
 package iam.bookme.service;
 
+import iam.bookme.client.UserClient;
 import iam.bookme.dto.BookingDto;
 import iam.bookme.dto.BookingMapper;
 import iam.bookme.dto.BookingRequestDto;
 import iam.bookme.dto.BookingStatusDto;
+import iam.bookme.dto.UserDto;
 import iam.bookme.entity.Booking;
 import iam.bookme.exception.BookingOptimisticLockException;
 import iam.bookme.exception.ResourceNotFoundException;
@@ -30,11 +32,13 @@ public class BookingService {
     private static final String DEFAULT_ORDER_BY_FIELD = "bookingId";
     private final OrderByFieldMapper orderByFieldMapper = new OrderByFieldMapper();
     private final BookingValidationService bookingValidationService;
+    private final UserClient userClient;
 
-    public BookingService(BookingRepository bookingRepository, BookingMapper bookingMapper, BookingValidationService bookingValidationService) {
+    public BookingService(BookingRepository bookingRepository, BookingMapper bookingMapper, BookingValidationService bookingValidationService, UserClient userClient) {
         this.bookingRepository = bookingRepository;
         this.bookingMapper = bookingMapper;
         this.bookingValidationService = bookingValidationService;
+        this.userClient = userClient;
         // map the user-provided field to db field
         orderByFieldMapper.setDefaultValue(DEFAULT_ORDER_BY_FIELD);
         orderByFieldMapper.addMapping("id", DEFAULT_ORDER_BY_FIELD);
@@ -65,12 +69,17 @@ public class BookingService {
         log.info("Create booking '{}'", bookingRequestDto);
 
         bookingValidationService.validateBookingRequestDto(bookingRequestDto);
-        // TODO: Change the logic here
+        // make call to userService
+        var userDto = getUserDtoFromUserService(bookingRequestDto.getUserEmail());
+
+
 //        if (Boolean.TRUE.equals(bookingRepository.existsByUserEmailIgnoreCase(bookingRequestDto.getUserEmail()))) {
 //            log.info("Booking [user email: {}] already exists", bookingRequestDto.getUserEmail());
 //            throw new ResourceAlreadyExistsException(BOOKING_ALREADY_EXISTS_MESSAGE);
 //        }
         Booking toBeSaved = bookingMapper.toEntity(bookingRequestDto);
+        // set userId to booking object
+        toBeSaved.setUserReferenceId(userDto.getId());
         setDefaultsToBooking(toBeSaved);
         var saved = bookingRepository.save(toBeSaved);
         log.info("Booking [id: {}] created successfully", saved.getBookingId());
@@ -128,5 +137,16 @@ public void deleteBooking(UUID bookingId) {
         final int DEFAULT_DURATION_IN_MINUTES = 45;
         toBeSaved.setStatus(BookingStatusDto.PENDING);
         toBeSaved.setDurationInMinutes(DEFAULT_DURATION_IN_MINUTES);
+    }
+
+    private UserDto getUserDtoFromUserService(String userEmail) {
+        UserDto userDto = userClient.getUserByEmail(userEmail);
+        if (userDto == null) {
+            // if user not found, create new user and save that userId with the booking
+            log.info("User with email {} not found", userEmail);
+            log.info("Creating new user with email {}", userEmail);
+            //TODO: continue here
+        }
+        return userDto;
     }
 }

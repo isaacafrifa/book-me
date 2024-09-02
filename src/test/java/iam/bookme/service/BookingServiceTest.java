@@ -1,5 +1,6 @@
 package iam.bookme.service;
 
+import iam.bookme.client.UserClient;
 import iam.bookme.dto.BookingDto;
 import iam.bookme.dto.BookingMapper;
 import iam.bookme.dto.BookingRequestDto;
@@ -52,6 +53,8 @@ class BookingServiceTest {
     private BookingMapper bookingMapper;
     @Mock
     private BookingValidationService bookingValidationService;
+    @Mock
+    private UserClient userClient;
     private Booking booking;
     private BookingRequestDto bookingRequestDto;
     /// This pattern (XXX) includes the 3-digit zone offset (e.g. +05:30 for India Standard Time).

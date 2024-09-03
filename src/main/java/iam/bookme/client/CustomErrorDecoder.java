@@ -2,7 +2,6 @@ package iam.bookme.client;
 
 import feign.Response;
 import feign.codec.ErrorDecoder;
-import iam.bookme.exception.ResourceNotFoundException;
 
 public class CustomErrorDecoder implements ErrorDecoder {
     @Override

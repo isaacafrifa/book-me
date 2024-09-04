@@ -1,10 +1,10 @@
 package iam.bookme.service;
 
-import iam.bookme.client.UserClient;
 import iam.bookme.dto.BookingDto;
 import iam.bookme.dto.BookingMapper;
 import iam.bookme.dto.BookingRequestDto;
 import iam.bookme.dto.BookingStatusDto;
+import iam.bookme.dto.UserDto;
 import iam.bookme.entity.Booking;
 import iam.bookme.exception.ResourceNotFoundException;
 import iam.bookme.repository.BookingRepository;
@@ -54,26 +54,32 @@ class BookingServiceTest {
     @Mock
     private BookingValidationService bookingValidationService;
     @Mock
-    private UserClient userClient;
+    private UserService userService;
     private Booking booking;
     private BookingRequestDto bookingRequestDto;
+
     /// This pattern (XXX) includes the 3-digit zone offset (e.g. +05:30 for India Standard Time).
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
+
     public static final UUID BOOKING_ID = UUID.fromString("f81d4fae-7dec-11e4-9635-286e88f7c621");
     public static final BookingStatusDto PENDING = BookingStatusDto.PENDING;
     public static final int DURATION_IN_MINUTES = 45;
     public static final String BOOKING_COMMENT = "This is a test booking.";
+    public static final String EMAIL = "test@example.com";
+    public static final String CREATED_ON = "2022-08-01T10:00:00+00:00";
+    public static final String UPDATED_ON = "2022-08-01T10:00:00+00:00";
+    public static final String START_TIME = "2022-08-05T11:00:00+00:00";
+
     @Captor
     ArgumentCaptor<Booking> bookingArgumentCaptor;
-    private final Long USER_ID =1L;
 
     @BeforeEach
     void setUp() {
         booking = new Booking(
-                USER_ID,
-                OffsetDateTime.parse("2022-08-01T10:00:00+00:00", formatter),
-                OffsetDateTime.parse("2022-08-01T10:00:00+00:00", formatter),
-                OffsetDateTime.parse("2022-08-05T11:00:00+00:00", formatter),
+                1L,
+                OffsetDateTime.parse(CREATED_ON, formatter),
+                OffsetDateTime.parse(UPDATED_ON, formatter),
+                OffsetDateTime.parse(START_TIME, formatter),
                 DURATION_IN_MINUTES,
                 PENDING,
                 BOOKING_COMMENT);
@@ -106,10 +112,11 @@ class BookingServiceTest {
         assertEquals(0, actual.getTotalElements(), "Expected no booking");
     }
 
-    //TODO Change logic here
     @Test
     void createBooking_shouldSaveBooking() {
         // given
+        var userDto = createUserDto();
+        given(userService.getUser(any())).willReturn(userDto);
         given(bookingMapper.toEntity(bookingRequestDto)).willReturn(booking);
         given(bookingRepository.save(booking)).willReturn(booking);
         // when
@@ -185,22 +192,20 @@ class BookingServiceTest {
         "Should throw an exception");
     }
 
-    // TODO: LOGIC HERE
-//    @Test
-//    void updateBooking_shouldUpdateBooking() {
-//        // given
-//        given(bookingRepository.findById(any())).willReturn(Optional.of(booking));
-//        // when
-//        underTest.updateBooking(BOOKING_ID, bookingRequestDto);
-//        // then
-//        verify(bookingRepository).save(bookingArgumentCaptor.capture());
-//        Booking capturedBooking = bookingArgumentCaptor.getValue();
-//        assertEquals(booking.getUserEmail(), capturedBooking.getUserEmail());
-//        assertEquals(bookingRequestDto.getStartTime(), capturedBooking.getStartTime());
-//        assertEquals(PENDING, capturedBooking.getStatus());
-//        assertEquals(booking.getComments(), capturedBooking.getComments());
-//        assertEquals(booking.getDurationInMinutes(), capturedBooking.getDurationInMinutes());
-//    }
+    @Test
+    void updateBooking_shouldUpdateBooking() {
+        // given
+        given(bookingRepository.findById(any())).willReturn(Optional.of(booking));
+        // when
+        underTest.updateBooking(BOOKING_ID, bookingRequestDto);
+        // then
+        verify(bookingRepository).save(bookingArgumentCaptor.capture());
+        Booking capturedBooking = bookingArgumentCaptor.getValue();
+        assertEquals(booking.getStartTime(), capturedBooking.getStartTime());
+        assertEquals(PENDING, capturedBooking.getStatus());
+        assertEquals(booking.getComments(), capturedBooking.getComments());
+        assertEquals(booking.getDurationInMinutes(), capturedBooking.getDurationInMinutes());
+    }
 
     @Test
     void updateBooking_shouldThrowExceptionForNonexistentId() {
@@ -238,8 +243,7 @@ void deleteBooking_shouldDeleteBooking() {
     private BookingDto createDefaultBookingDto() {
         var defaultBookingDto = new BookingDto();
         defaultBookingDto.setBookingId(BOOKING_ID);
-        // TODO: LOGIC HERE
-//        defaultBookingDto.setUserEmail(booking.getUserEmail());
+        defaultBookingDto.setUserId(booking.getUserReferenceId());
         defaultBookingDto.setCreatedDate(booking.getCreatedDate());
         defaultBookingDto.setUpdatedDate(booking.getUpdatedDate());
         defaultBookingDto.setStartTime(booking.getStartTime());
@@ -250,10 +254,14 @@ void deleteBooking_shouldDeleteBooking() {
 
     private BookingRequestDto createBookingRequestDto() {
         var defaultBookingRequestDto = new BookingRequestDto();
-        // TODO: LOGIC HERE
-//        defaultBookingRequestDto.setUserEmail(booking.getUserEmail());
+        defaultBookingRequestDto.setUserEmail(EMAIL);
         defaultBookingRequestDto.setStartTime(booking.getStartTime());
         defaultBookingRequestDto.setComments(booking.getComments());
         return defaultBookingRequestDto;
+    }
+
+    private UserDto createUserDto() {
+        return new UserDto("John", "Doe", EMAIL,
+                "0244599000", 1L,OffsetDateTime.now(), OffsetDateTime.now());
     }
 }

@@ -1,11 +1,9 @@
 package iam.bookme.service;
 
-import iam.bookme.client.UserClient;
 import iam.bookme.dto.BookingDto;
 import iam.bookme.dto.BookingMapper;
 import iam.bookme.dto.BookingRequestDto;
 import iam.bookme.dto.BookingStatusDto;
-import iam.bookme.dto.UserDto;
 import iam.bookme.entity.Booking;
 import iam.bookme.exception.BookingOptimisticLockException;
 import iam.bookme.exception.ResourceNotFoundException;
@@ -28,17 +26,17 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final BookingMapper bookingMapper;
     public static final String BOOKING_NOT_FOUND_MESSAGE = "Booking not found";
-    public static final String BOOKING_ALREADY_EXISTS_MESSAGE = "Booking already exists";
     private static final String DEFAULT_ORDER_BY_FIELD = "bookingId";
     private final OrderByFieldMapper orderByFieldMapper = new OrderByFieldMapper();
     private final BookingValidationService bookingValidationService;
-    private final UserClient userClient;
+    private final UserService userService;
 
-    public BookingService(BookingRepository bookingRepository, BookingMapper bookingMapper, BookingValidationService bookingValidationService, UserClient userClient) {
+
+    public BookingService(BookingRepository bookingRepository, BookingMapper bookingMapper, BookingValidationService bookingValidationService, UserService userService) {
         this.bookingRepository = bookingRepository;
         this.bookingMapper = bookingMapper;
         this.bookingValidationService = bookingValidationService;
-        this.userClient = userClient;
+        this.userService = userService;
         // map the user-provided field to db field
         orderByFieldMapper.setDefaultValue(DEFAULT_ORDER_BY_FIELD);
         orderByFieldMapper.addMapping("id", DEFAULT_ORDER_BY_FIELD);
@@ -69,17 +67,13 @@ public class BookingService {
         log.info("Create booking '{}'", bookingRequestDto);
 
         bookingValidationService.validateBookingRequestDto(bookingRequestDto);
+
+        //TODO: Think of what makes a booking a duplicate booking. Probably same userEmail, startTime and bookingStatus pending
+
         // make call to userService
-        var userDto = getUserDtoFromUserService(bookingRequestDto.getUserEmail());
-
-
-//        if (Boolean.TRUE.equals(bookingRepository.existsByUserEmailIgnoreCase(bookingRequestDto.getUserEmail()))) {
-//            log.info("Booking [user email: {}] already exists", bookingRequestDto.getUserEmail());
-//            throw new ResourceAlreadyExistsException(BOOKING_ALREADY_EXISTS_MESSAGE);
-//        }
+        var userDto = userService.getUser(bookingRequestDto);
         Booking toBeSaved = bookingMapper.toEntity(bookingRequestDto);
-        // set userId to booking object
-        toBeSaved.setUserReferenceId(userDto.getId());
+        toBeSaved.setUserReferenceId(userDto.id());
         setDefaultsToBooking(toBeSaved);
         var saved = bookingRepository.save(toBeSaved);
         log.info("Booking [id: {}] created successfully", saved.getBookingId());
@@ -93,10 +87,8 @@ public class BookingService {
 
         var existingBooking = getExistingBooking(bookingId);
         setDefaultsToBooking(existingBooking);
-        // TODO: CHECK THE LOGIC HERE
-//        existingBooking.setUserEmail(bookingRequestDto.getUserEmail());
-//        existingBooking.setStartTime(bookingRequestDto.getStartTime());
-//        existingBooking.setComments(bookingRequestDto.getComments());
+        existingBooking.setStartTime(bookingRequestDto.getStartTime());
+        existingBooking.setComments(bookingRequestDto.getComments());
 
         try {
             log.info("Booking [id: {}] updated successfully", bookingId);
@@ -139,14 +131,4 @@ public void deleteBooking(UUID bookingId) {
         toBeSaved.setDurationInMinutes(DEFAULT_DURATION_IN_MINUTES);
     }
 
-    private UserDto getUserDtoFromUserService(String userEmail) {
-        UserDto userDto = userClient.getUserByEmail(userEmail);
-        if (userDto == null) {
-            // if user not found, create new user and save that userId with the booking
-            log.info("User with email {} not found", userEmail);
-            log.info("Creating new user with email {}", userEmail);
-            //TODO: continue here
-        }
-        return userDto;
-    }
 }

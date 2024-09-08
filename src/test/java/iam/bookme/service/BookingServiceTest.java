@@ -6,6 +6,7 @@ import iam.bookme.dto.BookingRequestDto;
 import iam.bookme.dto.BookingStatusDto;
 import iam.bookme.dto.UserDto;
 import iam.bookme.entity.Booking;
+import iam.bookme.exception.ResourceAlreadyExistsException;
 import iam.bookme.exception.ResourceNotFoundException;
 import iam.bookme.repository.BookingRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -113,10 +114,12 @@ class BookingServiceTest {
     }
 
     @Test
-    void createBooking_shouldSaveBooking() {
+    void createBooking_shouldSaveBooking_withNewUser() {
         // given
         var userDto = createUserDto();
         given(userService.getUser(any())).willReturn(userDto);
+        given(bookingRepository.findByUserReferenceIdAndStartTime(userDto.id(), bookingRequestDto.getStartTime()))
+                .willReturn(Optional.empty());
         given(bookingMapper.toEntity(bookingRequestDto)).willReturn(booking);
         given(bookingRepository.save(booking)).willReturn(booking);
         // when
@@ -134,22 +137,74 @@ class BookingServiceTest {
         assertEquals(BOOKING_COMMENT, capturedBooking.getComments());
     }
 
-    //TODO Change logic here
-//    @Test
-//    void createBooking_shouldThrowExceptionWhenBookingAlreadyExists() {
-//        // given
-//        given(bookingRepository.existsByUserEmailIgnoreCase(bookingRequestDto.getUserEmail())).willReturn(true);
-//        // when + then
-//        assertThrows(
-//                ResourceAlreadyExistsException.class,
-//                () -> underTest.createBooking(bookingRequestDto),
-//                "Should throw exception"
-//        );
-//        verify(bookingMapper, never()).toEntity(bookingRequestDto);
-//        verify(bookingRepository, never()).save(any());
-//        verify(bookingMapper, never()).toDto(any());
-//        verify(bookingValidationService).validateBookingRequestDto(any());
-//    }
+    @Test
+    void createBooking_shouldSaveBooking_withCanceledStatus() {
+        // given
+        var userDto = createUserDto();
+        booking.setStatus(BookingStatusDto.CANCELLED); // use BookingStatusDto
+        given(userService.getUser(any())).willReturn(userDto);
+        given(bookingRepository.findByUserReferenceIdAndStartTime(userDto.id(), bookingRequestDto.getStartTime()))
+                .willReturn(Optional.of(booking));
+        given(bookingMapper.toEntity(bookingRequestDto)).willReturn(booking);
+        given(bookingRepository.save(booking)).willReturn(booking);
+        // when
+        underTest.createBooking(bookingRequestDto);
+        // then
+        verify(bookingMapper).toEntity(bookingRequestDto);
+        verify(bookingValidationService).validateBookingRequestDto(bookingRequestDto);
+        verify(bookingRepository).save(bookingArgumentCaptor.capture());
+        verify(bookingMapper, times(1)).toDto(booking);
+        Booking capturedBooking = bookingArgumentCaptor.getValue();
+        assertEquals(booking.getUserReferenceId(), capturedBooking.getUserReferenceId());
+        assertEquals(booking.getStartTime(), capturedBooking.getStartTime());
+        // Verify saved booking is PENDING
+        assertEquals(BookingStatusDto.PENDING, capturedBooking.getStatus());
+        assertEquals(DURATION_IN_MINUTES, capturedBooking.getDurationInMinutes());
+        assertEquals(BOOKING_COMMENT, capturedBooking.getComments());
+    }
+
+    @Test
+    void createBooking_shouldThrowExceptionWhenBookingAlreadyExists_withConfirmedStatus() {
+        // given
+        var userDto = createUserDto();
+        // create a booking object with confirmed status
+        booking.setStatus(BookingStatusDto.CONFIRMED);
+        given(userService.getUser(any())).willReturn(userDto);
+        given(bookingRepository.findByUserReferenceIdAndStartTime(userDto.id(), bookingRequestDto.getStartTime()))
+                .willReturn(Optional.of(booking));
+
+        // when + then
+        assertThrows(
+                ResourceAlreadyExistsException.class,
+                () -> underTest.createBooking(bookingRequestDto),
+                "Should throw exception"
+        );
+        verify(bookingMapper, never()).toEntity(bookingRequestDto);
+        verify(bookingRepository, never()).save(any());
+        verify(bookingMapper, never()).toDto(any());
+        verify(bookingValidationService).validateBookingRequestDto(any());
+    }
+
+    @Test
+    void createBooking_shouldThrowExceptionWhenBookingAlreadyExists_withPendingStatus() {
+        // Given
+        var userDto = createUserDto();
+        booking.setStatus(BookingStatusDto.PENDING); // Set existing booking to pending
+        given(userService.getUser(any())).willReturn(userDto);
+        given(bookingRepository.findByUserReferenceIdAndStartTime(userDto.id(), bookingRequestDto.getStartTime()))
+                .willReturn(Optional.of(booking));
+
+        // When + Then
+        assertThrows(
+                ResourceAlreadyExistsException.class,
+                () -> underTest.createBooking(bookingRequestDto),
+                "Should throw exception for pending booking"
+        );
+        verify(bookingMapper, never()).toEntity(bookingRequestDto);
+        verify(bookingRepository, never()).save(any());
+        verify(bookingMapper, never()).toDto(any());
+        verify(bookingValidationService).validateBookingRequestDto(any());
+    }
 
     @Test
     void getBookingById_shouldReturnBookingDto() {
@@ -189,7 +244,7 @@ class BookingServiceTest {
         String invalidId = "invalid-string-id";
         // When + Then
         assertThrows(IllegalArgumentException.class, () -> underTest.getBookingById(UUID.fromString(invalidId)),
-        "Should throw an exception");
+                "Should throw an exception");
     }
 
     @Test
@@ -219,14 +274,40 @@ class BookingServiceTest {
     }
 
     @Test
-void deleteBooking_shouldDeleteBooking() {
-    // given
-    given(bookingRepository.existsById(any())).willReturn(true);
-    // when
-    underTest.deleteBooking(BOOKING_ID);
-    // then
-    verify(bookingRepository).deleteById(BOOKING_ID);
-}
+    void updateBooking_shouldNotUpdateBooking_withCanceledStatus() {
+        // given
+        booking.setStatus(BookingStatusDto.CANCELLED);
+        given(bookingRepository.findById(any())).willReturn(Optional.of(booking));
+        // when + then
+        assertThrows(RuntimeException.class,
+                () -> underTest.updateBooking(BOOKING_ID, bookingRequestDto),
+                "Should throw an 'Booking cannot be updated' exception");
+        verify(bookingMapper, never()).toDto(any());
+        verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
+    void updateBooking_shouldNotUpdateBooking_withConfirmedStatus() {
+        // given
+        booking.setStatus(BookingStatusDto.CONFIRMED);
+        given(bookingRepository.findById(any())).willReturn(Optional.of(booking));
+        // when + then
+        assertThrows(RuntimeException.class,
+                () -> underTest.updateBooking(BOOKING_ID, bookingRequestDto),
+                "Should throw an 'Booking cannot be updated' exception");
+        verify(bookingMapper, never()).toDto(any());
+        verify(bookingRepository, never()).save(any());
+    }
+
+    @Test
+    void deleteBooking_shouldDeleteBooking() {
+        // given
+        given(bookingRepository.existsById(any())).willReturn(true);
+        // when
+        underTest.deleteBooking(BOOKING_ID);
+        // then
+        verify(bookingRepository).deleteById(BOOKING_ID);
+    }
 
     @Test
     void deleteBooking_shouldThrowExceptionForNonexistentId() {
@@ -262,6 +343,6 @@ void deleteBooking_shouldDeleteBooking() {
 
     private UserDto createUserDto() {
         return new UserDto("John", "Doe", EMAIL,
-                "0244599000", 1L,OffsetDateTime.now(), OffsetDateTime.now());
+                "0244599000", 1L, OffsetDateTime.now(), OffsetDateTime.now());
     }
 }

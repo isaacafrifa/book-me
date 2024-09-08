@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,7 +35,7 @@ class BookingRepositoryTest extends AbstractContainerTest {
     /// This pattern (XXX) includes the 3-digit zone offset (e.g. +05:30 for India Standard Time).
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
     private Booking booking;
-    private final Long USER_ID =1L;
+    private final Long USER_ID = 1L;
 
     @BeforeEach
     void setUp() {
@@ -133,6 +134,29 @@ class BookingRepositoryTest extends AbstractContainerTest {
         // Then
         assertNotNull(actual);
         assertEquals(0, actual.size());
+    }
+
+    @Test
+    void findByUserReferenceIdAndStartTime_shouldReturnBookingWhenFound() {
+        // Given
+        OffsetDateTime startTime = booking.getStartTime();
+        underTest.save(booking);
+        // When
+        Optional<Booking> foundBooking = underTest.findByUserReferenceIdAndStartTime(USER_ID, startTime);
+        // Then
+        assertTrue(foundBooking.isPresent());
+        assertEquals(booking, foundBooking.get());
+    }
+
+    @Test
+    void findByUserReferenceIdAndStartTime_shouldReturnEmptyWhenNotFound_dueToInvalidStartTime() {
+        // Given
+        OffsetDateTime startTime = OffsetDateTime.now().plusHours(1); // Different startTime
+        underTest.save(booking);
+        // When
+        Optional<Booking> foundBooking = underTest.findByUserReferenceIdAndStartTime(USER_ID, startTime);
+        // Then
+        assertTrue(foundBooking.isEmpty());
     }
 
 }

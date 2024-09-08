@@ -6,6 +6,7 @@ import iam.bookme.dto.BookingRequestDto;
 import iam.bookme.dto.BookingStatusDto;
 import iam.bookme.entity.Booking;
 import iam.bookme.exception.BookingOptimisticLockException;
+import iam.bookme.exception.ResourceAlreadyExistsException;
 import iam.bookme.exception.ResourceNotFoundException;
 import iam.bookme.mapper.OrderByFieldMapper;
 import iam.bookme.repository.BookingRepository;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -26,6 +28,8 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final BookingMapper bookingMapper;
     public static final String BOOKING_NOT_FOUND_MESSAGE = "Booking not found";
+    private static final String BOOKING_ALREADY_EXISTS_MESSAGE = "Booking already exists";
+    private static final String BOOKING_ALREADY_CONFIRMED_MESSAGE = "Booking already confirmed";
     private static final String DEFAULT_ORDER_BY_FIELD = "bookingId";
     private final OrderByFieldMapper orderByFieldMapper = new OrderByFieldMapper();
     private final BookingValidationService bookingValidationService;
@@ -67,11 +71,24 @@ public class BookingService {
         log.info("Create booking '{}'", bookingRequestDto);
 
         bookingValidationService.validateBookingRequestDto(bookingRequestDto);
-
-        //TODO: Think of what makes a booking a duplicate booking. Probably same userEmail, startTime and bookingStatus pending
-
-        // make call to userService
+        // make call to userService to retrieve user
         var userDto = userService.getUser(bookingRequestDto);
+        // Check for existing booking
+        Optional<Booking> optionalBooking = bookingRepository.findByUserReferenceIdAndStartTime(
+                userDto.id(),
+                bookingRequestDto.getStartTime()
+        );
+        if (optionalBooking.isPresent()) {
+            BookingStatusDto existingStatus = optionalBooking.get().getStatus();
+            if (existingStatus == BookingStatusDto.CONFIRMED) {
+                log.info("Booking with details [email: {}, startTime: {}] already exists and is confirmed.", bookingRequestDto.getUserEmail(), bookingRequestDto.getStartTime());
+                throw new ResourceAlreadyExistsException(BOOKING_ALREADY_CONFIRMED_MESSAGE);
+            } else if (existingStatus == BookingStatusDto.PENDING) {
+                log.info("Booking with details [email: {}, startTime: {}] already exists and is pending.", bookingRequestDto.getUserEmail(), bookingRequestDto.getStartTime());
+                throw new ResourceAlreadyExistsException(BOOKING_ALREADY_EXISTS_MESSAGE);
+            }
+        }
+        // Create new booking
         Booking toBeSaved = bookingMapper.toEntity(bookingRequestDto);
         toBeSaved.setUserReferenceId(userDto.id());
         setDefaultsToBooking(toBeSaved);
@@ -86,7 +103,11 @@ public class BookingService {
         bookingValidationService.validateBookingRequestDto(bookingRequestDto);
 
         var existingBooking = getExistingBooking(bookingId);
-        setDefaultsToBooking(existingBooking);
+        // Check if the booking is canceled or completed
+        if (existingBooking.getStatus() == BookingStatusDto.CANCELLED || existingBooking.getStatus() == BookingStatusDto.CONFIRMED) {
+            log.info("Booking with id '{}' cannot be updated as it is already '{}'", bookingId, existingBooking.getStatus());
+            throw new RuntimeException("Booking cannot be updated ");
+        }
         existingBooking.setStartTime(bookingRequestDto.getStartTime());
         existingBooking.setComments(bookingRequestDto.getComments());
 
@@ -99,15 +120,15 @@ public class BookingService {
         }
     }
 
-public void deleteBooking(UUID bookingId) {
-    log.info("Delete booking with id '{}'", bookingId);
-    if (!bookingRepository.existsById(bookingId)) {
-        log.info("Booking with id '{}' not found", bookingId);
-        throw new ResourceNotFoundException(BOOKING_NOT_FOUND_MESSAGE);
+    public void deleteBooking(UUID bookingId) {
+        log.info("Delete booking with id '{}'", bookingId);
+        if (!bookingRepository.existsById(bookingId)) {
+            log.info("Booking with id '{}' not found", bookingId);
+            throw new ResourceNotFoundException(BOOKING_NOT_FOUND_MESSAGE);
+        }
+        bookingRepository.deleteById(bookingId);
+        log.info("Booking with id '{}' deleted successfully", bookingId);
     }
-    bookingRepository.deleteById(bookingId);
-    log.info("Booking with id '{}' deleted successfully", bookingId);
-}
 
 
     private Booking getExistingBooking(UUID bookingId) {

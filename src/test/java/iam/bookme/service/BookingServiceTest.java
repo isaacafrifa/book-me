@@ -29,7 +29,6 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -62,7 +61,8 @@ class BookingServiceTest {
     /// This pattern (XXX) includes the 3-digit zone offset (e.g. +05:30 for India Standard Time).
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
 
-    public static final UUID BOOKING_ID = UUID.fromString("f81d4fae-7dec-11e4-9635-286e88f7c621");
+    public static final Long BOOKING_ID = 1L;
+    public static final Long NON_EXISTENT_ID = 33L;
     public static final BookingStatusDto PENDING = BookingStatusDto.PENDING;
     public static final int DURATION_IN_MINUTES = 45;
     public static final String BOOKING_COMMENT = "This is a test booking.";
@@ -243,7 +243,7 @@ class BookingServiceTest {
         // Given
         String invalidId = "invalid-string-id";
         // When + Then
-        assertThrows(IllegalArgumentException.class, () -> underTest.getBookingById(UUID.fromString(invalidId)),
+        assertThrows(IllegalArgumentException.class, () -> underTest.getBookingById(Long.valueOf((invalidId))),
                 "Should throw an exception");
     }
 
@@ -265,7 +265,7 @@ class BookingServiceTest {
     @Test
     void updateBooking_shouldThrowExceptionForNonexistentId() {
         // given
-        UUID nonExistentId = UUID.randomUUID();
+        Long nonExistentId = NON_EXISTENT_ID;
         given(bookingRepository.findById(nonExistentId)).willReturn(Optional.empty());
         // when + then
         assertThrows(ResourceNotFoundException.class,
@@ -312,7 +312,7 @@ class BookingServiceTest {
     @Test
     void deleteBooking_shouldThrowExceptionForNonexistentId() {
         // given
-        UUID nonExistentId = UUID.randomUUID();
+        Long nonExistentId = NON_EXISTENT_ID;
         given(bookingRepository.existsById(nonExistentId)).willReturn(false);
         // when + then
         assertThrows(ResourceNotFoundException.class,

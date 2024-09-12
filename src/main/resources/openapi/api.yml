@@ -9,7 +9,7 @@ externalDocs:
   description: Find out more about Booking API
   url: http://example.com
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:8081
     description: Local server
 tags:
   - name: bookings
@@ -131,8 +131,8 @@ paths:
         - name: id
           in: path
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
           required: true
           description: ID of the booking to retrieve
       responses:
@@ -170,8 +170,8 @@ paths:
         - name: id
           in: path
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
           required: true
           description: ID of the booking to update
       requestBody:
@@ -216,8 +216,8 @@ paths:
         - name: id
           in: path
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
           required: true
           description: ID of the booking to delete
       responses:
@@ -249,8 +249,10 @@ components:
       type: object
       properties:
         bookingId:
-          type: string
-          format: uuid
+          type: integer
+          format: int64
+          example: 12345
+          description: Unique identifier for the booking
         userId:
           type: integer
           format: int64

@@ -19,7 +19,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @Slf4j
@@ -59,7 +58,7 @@ public class BookingService {
                 .map(bookingMapper::toDto);
     }
 
-    public BookingDto getBookingById(UUID bookingId) {
+    public BookingDto getBookingById(Long bookingId) {
         log.info("Get booking by id '{}'", bookingId);
 
         return bookingRepository.findById(bookingId)
@@ -97,7 +96,7 @@ public class BookingService {
         return bookingMapper.toDto(saved);
     }
 
-    public BookingDto updateBooking(UUID bookingId, BookingRequestDto bookingRequestDto) {
+    public BookingDto updateBooking(Long bookingId, BookingRequestDto bookingRequestDto) {
         log.info("Update booking with id '{}'", bookingId);
 
         bookingValidationService.validateBookingRequestDto(bookingRequestDto);
@@ -120,7 +119,7 @@ public class BookingService {
         }
     }
 
-    public void deleteBooking(UUID bookingId) {
+    public void deleteBooking(Long bookingId) {
         log.info("Delete booking with id '{}'", bookingId);
         if (!bookingRepository.existsById(bookingId)) {
             log.info("Booking with id '{}' not found", bookingId);
@@ -131,7 +130,7 @@ public class BookingService {
     }
 
 
-    private Booking getExistingBooking(UUID bookingId) {
+    private Booking getExistingBooking(Long bookingId) {
         return bookingRepository
                 .findById(bookingId).
                 orElseThrow(() -> {

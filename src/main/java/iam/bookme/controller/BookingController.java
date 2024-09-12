@@ -11,8 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
-
 @RestController
 @RequestMapping("/api/v1")
 @Slf4j
@@ -36,7 +34,7 @@ public class BookingController implements BookingsApi {
     }
 
     @Override
-    public ResponseEntity<BookingDto> getBookingById(UUID id) {
+    public ResponseEntity<BookingDto> getBookingById(Long id) {
         log.debug("Received request to get booking by id {}", id);
         var response = bookingService.getBookingById(id);
         return ResponseEntity.ok(response);
@@ -50,14 +48,14 @@ public class BookingController implements BookingsApi {
     }
 
     @Override
-    public ResponseEntity<BookingDto> updateBooking(UUID id, @Valid BookingRequestDto bookingRequestDto) {
+    public ResponseEntity<BookingDto> updateBooking(Long id, @Valid BookingRequestDto bookingRequestDto) {
         log.debug("Received request to update booking with id {}", id);
         var response = bookingService.updateBooking(id, bookingRequestDto);
         return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<Void> deleteBooking(UUID id) {
+    public ResponseEntity<Void> deleteBooking(Long id) {
         log.debug("Received request to delete booking with id {}", id);
         bookingService.deleteBooking(id);
         return ResponseEntity.noContent().build();

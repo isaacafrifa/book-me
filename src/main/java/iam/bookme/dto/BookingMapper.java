@@ -15,12 +15,5 @@ public interface BookingMapper {
     @Mapping(source = "comments", target = "comments")
     Booking toEntity(BookingRequestDto bookingRequestDto);
 
-    @Mapping(source = "bookingId", target = "bookingId")
-    @Mapping(source = "startTime", target = "startTime")
-    @Mapping(source = "comments", target = "comments")
-    @Mapping(source = "userReferenceId", target = "userId")
-    @Mapping(source = "createdDate", target = "createdDate")
-    @Mapping(source = "updatedDate", target = "updatedDate")
-    @Mapping(source = "status", target = "bookingStatus")
     BookingDto toDto(Booking booking);
 }

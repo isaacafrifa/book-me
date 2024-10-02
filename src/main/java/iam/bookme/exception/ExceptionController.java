@@ -38,6 +38,13 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<APIError> handleServiceUnavailableException(ServiceUnavailableException ex, WebRequest request) {
+        APIError errorDetails = new APIError(ex.getMessage(),
+                extractPath(request.getDescription(false)));
+        return new ResponseEntity<>(errorDetails, HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
     /* This exception is thrown when a client sends a request with an illegal request argument e.g. invalid date format, negative value, etc. */
     @ExceptionHandler({IllegalArgumentException.class, MethodArgumentTypeMismatchException.class,
             DateTimeException.class})

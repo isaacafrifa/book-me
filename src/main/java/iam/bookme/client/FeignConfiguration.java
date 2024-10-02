@@ -32,7 +32,7 @@ public class FeignConfiguration {
      */
     @Bean
     public Request.Options options() {
-        return new Request.Options(5000, TimeUnit.MILLISECONDS, 5000, TimeUnit.MILLISECONDS, true);
+        return new Request.Options(3000, TimeUnit.MILLISECONDS, 3000, TimeUnit.MILLISECONDS, true);
     }
 
 }

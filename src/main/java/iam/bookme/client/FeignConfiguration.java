@@ -3,6 +3,8 @@ package iam.bookme.client;
 import feign.Logger;
 import feign.Request;
 import feign.codec.ErrorDecoder;
+import feign.micrometer.MicrometerObservationCapability;
+import io.micrometer.observation.ObservationRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,6 +35,15 @@ public class FeignConfiguration {
     @Bean
     public Request.Options options() {
         return new Request.Options(3000, TimeUnit.MILLISECONDS, 3000, TimeUnit.MILLISECONDS, true);
+    }
+
+    /*
+     * This will enable the observation capability for the feign client.
+     * @return MicrometerObservationCapability
+     */
+    @Bean
+    public MicrometerObservationCapability micrometerObservationCapability(ObservationRegistry registry) {
+        return new MicrometerObservationCapability(registry);
     }
 
 }

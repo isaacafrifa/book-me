@@ -19,6 +19,7 @@
         <lombok.version>1.18.32</lombok.version>
         <spring-cloud.version>2023.0.3</spring-cloud.version>
         <loki.version>1.5.1</loki.version>
+        <cucumber.version>7.20.0</cucumber.version>
     </properties>
     <dependencies>
         <dependency>
@@ -149,6 +150,25 @@
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-micrometer</artifactId>
             <version>13.4</version>
+        </dependency>
+        <!-- Cucumber -->
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-java</artifactId>
+            <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-junit</artifactId>
+            <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-spring</artifactId>
+            <version>${cucumber.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

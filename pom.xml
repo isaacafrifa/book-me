@@ -18,8 +18,11 @@
         <testcontainers.version>1.19.8</testcontainers.version>
         <lombok.version>1.18.32</lombok.version>
         <spring-cloud.version>2023.0.3</spring-cloud.version>
+        <mapstruct.version>1.6.2</mapstruct.version>
         <loki.version>1.5.1</loki.version>
         <cucumber.version>7.20.0</cucumber.version>
+        <cucumber-reporting.version>5.8.2</cucumber-reporting.version>
+        <wiremock.version>3.9.1</wiremock.version>
     </properties>
     <dependencies>
         <dependency>
@@ -58,7 +61,7 @@
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
-            <version>1.6.0.Beta1</version>
+            <version>${mapstruct.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -160,15 +163,33 @@
         </dependency>
         <dependency>
             <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-spring</artifactId>
+            <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
             <artifactId>cucumber-junit</artifactId>
             <version>${cucumber.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.cucumber</groupId>
-            <artifactId>cucumber-spring</artifactId>
+            <artifactId>cucumber-junit-platform-engine</artifactId>
             <version>${cucumber.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.masterthought</groupId>
+            <artifactId>cucumber-reporting</artifactId>
+            <version>${cucumber-reporting.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Wiremock - to mock HTTP endpoints (e.g.User Service) -->
+        <dependency>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>${wiremock.version}</version>
         </dependency>
     </dependencies>
 
@@ -244,7 +265,7 @@
                         <path>
                             <groupId>org.mapstruct</groupId>
                             <artifactId>mapstruct-processor</artifactId>
-                            <version>1.6.0.Beta1</version>
+                            <version>${mapstruct.version}</version>
                         </path>
                         <path>
                             <groupId>org.projectlombok</groupId>
@@ -252,6 +273,11 @@
                             <version>${lombok.version}</version>
                         </path>
                     </annotationProcessorPaths>
+                    <compilerArgs>
+                        <!--  Uncomment for verbose logging-->
+                        <!-- <arg>-Amapstruct.verbose=true</arg>-->
+                        <arg>-Amapstruct.unmappedTargetPolicy=ERROR</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
         </plugins>

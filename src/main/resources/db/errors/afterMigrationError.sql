@@ -1,0 +1,2 @@
+-- This file is executed when there is an error during the migration. It removes the entry so it can be tried again w/o manual modification in the DB.
+DELETE IGNORE FROM flyway_schema_history WHERE success = 0;

@@ -1,4 +1,4 @@
-package cucumber;
+package cucumber.steps;
 
 import iam.bookme.Application;
 import io.cucumber.java.Before;

@@ -1,17 +1,17 @@
 services:
   postgres:
-    image: postgres:15.0
+    image: postgres:16.1
     container_name: booking_postgres
     restart: unless-stopped
     ports:
-      - '5432:5432'
+      - '5431:5432'
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_DB: ${DB_NAME}
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d # Mount your init scripts
 
 volumes:
   postgres-data:
-

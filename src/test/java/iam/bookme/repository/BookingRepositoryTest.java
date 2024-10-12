@@ -15,9 +15,9 @@ import org.springframework.test.context.ActiveProfiles;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
+import static iam.bookme.config.AppConstants.DATE_TIME_FORMATTER;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -32,8 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class BookingRepositoryTest extends AbstractContainerTest {
     @Autowired
     private BookingRepository underTest;
-    /// This pattern (XXX) includes the 3-digit zone offset (e.g. +05:30 for India Standard Time).
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
     private Booking booking;
     private final Long USER_ID = 1L;
 
@@ -41,9 +39,9 @@ class BookingRepositoryTest extends AbstractContainerTest {
     void setUp() {
         booking = new Booking(
                 USER_ID,
-                OffsetDateTime.parse("2022-08-01T10:00:00+00:00", formatter),
-                OffsetDateTime.parse("2022-08-01T10:00:00+00:00", formatter),
-                OffsetDateTime.parse("2022-08-05T11:00:00+00:00", formatter),
+                OffsetDateTime.parse("2022-08-01T10:00:00+00:00", DATE_TIME_FORMATTER),
+                OffsetDateTime.parse("2022-08-01T10:00:00+00:00", DATE_TIME_FORMATTER),
+                OffsetDateTime.parse("2022-08-05T11:00:00+00:00", DATE_TIME_FORMATTER),
                 45,
                 BookingStatusDto.PENDING,
                 "This is a test booking.");

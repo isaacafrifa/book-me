@@ -26,10 +26,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Optional;
 
+import static iam.bookme.config.AppConstants.DATE_TIME_FORMATTER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -58,9 +58,6 @@ class BookingServiceTest {
     private Booking booking;
     private BookingRequestDto bookingRequestDto;
 
-    /// This pattern (XXX) includes the 3-digit zone offset (e.g. +05:30 for India Standard Time).
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
-
     public static final Long BOOKING_ID = 1L;
     public static final Long NON_EXISTENT_ID = 33L;
     public static final BookingStatusDto PENDING = BookingStatusDto.PENDING;
@@ -78,9 +75,9 @@ class BookingServiceTest {
     void setUp() {
         booking = new Booking(
                 1L,
-                OffsetDateTime.parse(CREATED_ON, formatter),
-                OffsetDateTime.parse(UPDATED_ON, formatter),
-                OffsetDateTime.parse(START_TIME, formatter),
+                OffsetDateTime.parse(CREATED_ON, DATE_TIME_FORMATTER),
+                OffsetDateTime.parse(UPDATED_ON, DATE_TIME_FORMATTER),
+                OffsetDateTime.parse(START_TIME, DATE_TIME_FORMATTER),
                 DURATION_IN_MINUTES,
                 PENDING,
                 BOOKING_COMMENT);

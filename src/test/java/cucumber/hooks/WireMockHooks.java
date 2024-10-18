@@ -1,6 +1,7 @@
 package cucumber.hooks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
@@ -22,9 +23,10 @@ import static io.cucumber.spring.CucumberTestContext.SCOPE_CUCUMBER_GLUE;
 @Scope(SCOPE_CUCUMBER_GLUE)
 public class WireMockHooks {
     private static final String USER_ENDPOINT = "/api/v1/users";
-    private static final int WIREMOCK_PORT = 9090;
+    private static final int WIREMOCK_PORT = 9060;
     private final WireMockServer wireMockServer = new WireMockServer(WireMockConfiguration.options().port(WIREMOCK_PORT));
-    private final ObjectMapper objectMapper= new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule());
 
     @Before
     public void setUp() {

@@ -5,6 +5,7 @@ import cucumber.context.UtilCucumber;
 import iam.bookme.dto.BookingDto;
 import iam.bookme.repository.BookingRepository;
 import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +34,17 @@ public class GeneralSteps {
         utilCucumber.doAPIObjectCall(endpoint, HttpMethod.GET, BookingDto.class, null,null);
         if (testContext.getHttpResponse() != null && testContext.getHttpResponse().getBody() != null) {
             testContext.setBookingDto((BookingDto) testContext.getHttpResponse().getBody());
-        } else {
+        }
+    }
+
+    @Then("the response status code {int} should be returned")
+    public void theResponseStatusCodeShouldBeReturned(int expected) {
+        log.info("Expected HTTP status code should be {}", expected);
+
+        if (testContext.getHttpResponseCode() == -1){
             log.info("No response received");
         }
+        int actual = testContext.getHttpResponseCode();
+        assertEquals(expected, actual, "HTTP status code do not match");
     }
 }

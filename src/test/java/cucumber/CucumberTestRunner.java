@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
  * This class is used to run the Cucumber tests.
  */
 
-@ActiveProfiles("test")
+@ActiveProfiles("cucumber")
 @RunWith(Cucumber.class)
 @CucumberOptions(features = "src/test/resources/features",
         glue = "src/test/java/cucumber/steps",

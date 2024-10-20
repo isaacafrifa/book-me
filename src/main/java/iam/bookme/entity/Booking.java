@@ -11,7 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -23,7 +22,6 @@ import java.time.OffsetDateTime;
 @Entity
 @Table
 @EntityListeners(AuditingEntityListener.class)
-@Getter
 @Setter
 @NoArgsConstructor
 public class Booking {
@@ -69,4 +67,44 @@ public class Booking {
         this.comments = comments;
     }
 
+    /*
+     * Explicitly define getter methods to ensure MapStruct can properly
+     * detect and use them for the Booking class, as it fails to recognize
+     * the default Lombok-generated getters.
+     */
+    public Long getBookingId() {
+        return bookingId;
+    }
+
+    public Long getUserReferenceId() {
+        return userReferenceId;
+    }
+
+    public OffsetDateTime getCreatedDate() {
+        return createdDate;
+    }
+
+    public OffsetDateTime getUpdatedDate() {
+        return updatedDate;
+    }
+
+    public OffsetDateTime getStartTime() {
+        return startTime;
+    }
+
+    public int getDurationInMinutes() {
+        return durationInMinutes;
+    }
+
+    public BookingStatusDto getStatus() {
+        return status;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
 }

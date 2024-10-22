@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import iam.bookme.repository.BookingRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -19,6 +20,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,7 +31,7 @@ import static org.springframework.util.CollectionUtils.toMultiValueMap;
 @Slf4j
 @Component
 @Scope(SCOPE_CUCUMBER_GLUE)
-public class UtilCucumber {
+public class CucumberService {
 
     @Autowired
     private TestContext context;
@@ -47,6 +49,35 @@ public class UtilCucumber {
     @LocalServerPort
     protected int port;
 
+
+    public Map<String, Object> getBookingRequestDto(String fieldToBeRemoved) {
+        Map<String, Object> createRequestDto = createInitialBookingRequestDto();
+
+        if (!Strings.isNullOrEmpty(fieldToBeRemoved)) {
+            removeFieldIfExists(createRequestDto, fieldToBeRemoved);
+        } else {
+            log.info("Not removing any field from BookingRequestDto");
+        }
+        return createRequestDto;
+    }
+
+    private Map<String, Object> createInitialBookingRequestDto() {
+        Map<String, Object> dto = new HashMap<>();
+        dto.put("userEmail", "john.doe@example.com");
+        dto.put("startTime", "2023-08-01T10:00:00+00:00");
+        dto.put("comments", "This is a side comment");
+        return dto;
+    }
+
+    private void removeFieldIfExists(Map<String, Object> dto, String fieldToRemove) {
+        if (!dto.containsKey(fieldToRemove)) {
+            throw new IllegalArgumentException(
+                    String.format("Field '%s' does not exist in BookingRequestDto and cannot be removed", fieldToRemove)
+            );
+        }
+        log.info("Removing field '{}' from BookingRequestDto", fieldToRemove);
+        dto.remove(fieldToRemove);
+    }
 
     public void doAPIObjectCall(String urlEndpoint, HttpMethod httpMethod, Class<?> returnedTypeClass,
                                 Map<String, Object> rawPayload, Map<String, String> queryParams) {

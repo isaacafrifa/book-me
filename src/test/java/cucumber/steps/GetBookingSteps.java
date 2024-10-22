@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 @RequiredArgsConstructor
-public class RetrieveBookingSteps {
+public class GetBookingSteps {
 
     private final BookingRepository bookingRepository;
     private final TestContext testContext;

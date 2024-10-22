@@ -11,6 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
+import java.util.Map;
 
 import static io.cucumber.spring.CucumberTestContext.SCOPE_CUCUMBER_GLUE;
 
@@ -27,6 +28,7 @@ public class TestContext {
     private List<Long> bookingsToDelete;
     private BookingDto bookingDto;
     private BookingRequestDto bookingRequestDto;
+    private Map<String, Object> createBookingRequestPayload;
     private Long activeBookingId;
     private BookingsListDto bookingsListDto;
     private HttpClientErrorException exception;

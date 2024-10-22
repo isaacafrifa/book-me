@@ -68,7 +68,7 @@ public class Booking {
     }
 
     /*
-     * Explicitly define getter methods to ensure MapStruct can properly
+     * Explicitly define getter and setter methods to ensure MapStruct can properly
      * detect and use them for the Booking class, as it fails to recognize
      * the default Lombok-generated getters.
      */

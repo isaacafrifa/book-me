@@ -1,6 +1,6 @@
-# Book Me
+# Booking Service
 
-BookMe manages bookings.
+This service manages bookings.
 
 ### Current Status
 

@@ -148,7 +148,7 @@ public class CucumberService {
     }
 
     private String getApiUrl() {
-        return apiHost + ":" + port + "/api/" + apiVersion + "/";
+        return apiHost + ":" + port + "/api/" + apiVersion;
     }
 
     private Object cleanPayload(MediaType contentType, Map<String, Object> rawPayload) throws JsonProcessingException {

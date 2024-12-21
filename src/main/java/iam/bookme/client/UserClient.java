@@ -28,7 +28,7 @@ public interface UserClient {
     UserDto createUserInUserService(UserRequestDto userRequestDto);
 
     default UserDto userServiceFallback(Throwable throwable) {
-        LOG.warn("User Service is currently available due to: {}", throwable.getMessage());
+        LOG.warn("User Service is currently unavailable due to: {}", throwable.getMessage());
         throw new ServiceUnavailableException("User service is currently unavailable");
     }
 }

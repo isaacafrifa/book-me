@@ -141,9 +141,16 @@ public class BookingService {
 
     private Sort.Direction getSortDirection(String direction) {
         assert direction != null;
-        if (direction.contains("desc")) return Sort.Direction.DESC;
-        return Sort.Direction.ASC;
+        return switch (direction.toLowerCase()) {
+            case "asc" -> Sort.Direction.ASC;
+            case "desc" -> Sort.Direction.DESC;
+            default -> {
+                log.error("Invalid sort direction: '{}'", direction);
+                throw new IllegalArgumentException("Invalid sort direction. Must be 'asc' or 'desc'");
+            }
+        };
     }
+
 
     private void setDefaultsToBooking(Booking toBeSaved) {
         final int DEFAULT_DURATION_IN_MINUTES = 45;

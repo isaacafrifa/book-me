@@ -1,5 +1,6 @@
 package iam.bookme.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -54,6 +55,16 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Handles validation errors that occur during method argument validation.
+     * Collects all field validation errors and returns them in a consolidated error response.
+     *
+     * @param ex The MethodArgumentNotValidException containing validation errors
+     * @param headers The HTTP headers for the response
+     * @param status The HTTP status code
+     * @param request The web request that triggered the exception
+     * @return ResponseEntity containing consolidated error details
+     */
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         List<String> errors = ex.getBindingResult().getFieldErrors().stream()
@@ -88,6 +99,21 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
                 ex.getLocalizedMessage(),
                 extractPath(request.getDescription(false)));
         return handleExceptionInternal(ex, apiError, headers, status, request);
+    }
+
+    /**
+     * Handles constraint violation exceptions that occur during request parameter validation.
+     * Returns a BAD_REQUEST (400) status with details about the validation failure. e.g. ".../bookings?pageNo=-1"
+     *
+     * @param ex The ConstraintViolationException thrown during validation
+     * @param request The web request that triggered the exception
+     * @return ResponseEntity containing error details and BAD_REQUEST status
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex, WebRequest request) {
+        APIError apiError = new APIError(
+                ex.getLocalizedMessage(), extractPath(request.getDescription(false)));
+         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({Exception.class})

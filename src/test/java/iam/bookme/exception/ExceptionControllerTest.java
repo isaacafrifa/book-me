@@ -78,8 +78,8 @@ class ExceptionControllerTest {
         final BindingResult bindingResult = mock(BindingResult.class);
 
         final List<FieldError> fieldErrors = new ArrayList<>();
-        final FieldError fieldError1 = new FieldError("object", "field1", "field 1 violation message");
-        final FieldError fieldError2 = new FieldError("object", "field2", "field 2 violation message");
+        final FieldError fieldError1 = new FieldError("object", "field 1", "violation message");
+        final FieldError fieldError2 = new FieldError("object", "field 2", "violation message");
         fieldErrors.add(fieldError1);
         fieldErrors.add(fieldError2);
 

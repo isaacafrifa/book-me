@@ -1,5 +1,7 @@
 package cucumber;
 
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -18,4 +20,15 @@ public class TestConfig {
         return new RestTemplate();
     }
 
+    /**
+     * Provides a NoOpCacheManager bean for testing environment.
+     * Using NoOpCacheManager in tests is preferred because:
+     * 1. It ensures test isolation by preventing cached data from affecting other tests
+     * 2. It verifies actual database operations instead of cached results
+     * @return A NoOpCacheManager instance that bypasses caching
+     */
+    @Bean
+    public CacheManager cacheManager() {
+        return new NoOpCacheManager();
+    }
 }

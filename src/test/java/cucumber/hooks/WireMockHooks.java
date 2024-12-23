@@ -9,18 +9,16 @@ import iam.bookme.dto.UserDto;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Scope;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.notFound;
-import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static io.cucumber.spring.CucumberTestContext.SCOPE_CUCUMBER_GLUE;
 
 @Scope(SCOPE_CUCUMBER_GLUE)
+@Slf4j
 public class WireMockHooks {
     private static final String USER_ENDPOINT = "/api/v1/users";
     private static final int WIREMOCK_PORT = 9060;
@@ -30,30 +28,35 @@ public class WireMockHooks {
 
     @Before
     public void setUp() {
-        WireMock.configureFor(WIREMOCK_PORT);
         wireMockServer.start();
-       mockUserServiceCall();
+        WireMock.configureFor("localhost", WIREMOCK_PORT);
+        mockUserServiceCall();
+        log.info("WireMock started on port: {}", WIREMOCK_PORT);
     }
 
     @After
     public void tearDown() {
+        wireMockServer.resetAll();
         wireMockServer.stop();
     }
 
     private void mockUserServiceCall() {
-        var userEmails = List.of("john.doe@example.com", "notfound@example.com");
-        for (String userEmail : userEmails) {
-          if (userEmail.equals("john.doe@example.com")){
-              stubFor(get(USER_ENDPOINT.concat("/email"))
-                      .willReturn(okJson(
-                              buildUserServiceResponse(userEmail))));
-          }
-          else {
-              stubFor(get(USER_ENDPOINT.concat("/email"))
-                      .willReturn(notFound()));
-          }
-        }
+        // Match the exact endpoint and query parameter pattern
+        stubFor(WireMock.get(WireMock.urlPathEqualTo("/api/v1/users/email"))
+                .withQueryParam("userEmail", WireMock.equalTo("john.doe@example.com"))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(buildUserServiceResponse("john.doe@example.com"))));
 
+        // For POST requests
+        stubFor(WireMock.post(WireMock.urlPathEqualTo("/api/v1/users"))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(201)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(buildUserServiceResponse("john.doe@example.com"))));
+
+        log.info("Stubbed GET and POST requests for user endpoints");
     }
 
     @SneakyThrows
@@ -69,5 +72,4 @@ public class WireMockHooks {
         );
         return objectMapper.writeValueAsString(userDto);
     }
-
 }

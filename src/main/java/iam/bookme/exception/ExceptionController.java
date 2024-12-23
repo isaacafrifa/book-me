@@ -1,7 +1,7 @@
 package iam.bookme.exception;
 
 import jakarta.validation.ConstraintViolationException;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -21,6 +21,7 @@ import java.time.DateTimeException;
 import java.util.List;
 
 @RestControllerAdvice
+@Slf4j
 public class ExceptionController extends ResponseEntityExceptionHandler {
 
     public static final String INVALID_REQUEST_ARGUMENT = "Invalid request argument";
@@ -67,9 +68,12 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
      */
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        List<String> errors = ex.getBindingResult().getFieldErrors().stream()
-                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+        List<String> errors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> error.getField() + " " + error.getDefaultMessage())
                 .toList();
+
         String errorString = String.join(", ", errors);
         APIError apiError = new APIError(errorString, extractPath(request.getDescription(false)));
         return handleExceptionInternal(ex, apiError, headers, status, request);

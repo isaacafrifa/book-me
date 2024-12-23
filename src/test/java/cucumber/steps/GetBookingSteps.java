@@ -6,6 +6,7 @@ import iam.bookme.dto.BookingDto;
 import iam.bookme.dto.BookingsListDto;
 import iam.bookme.entity.Booking;
 import iam.bookme.repository.BookingRepository;
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;
@@ -171,5 +172,27 @@ public class GetBookingSteps {
         return true;
     }
 
+
+    @And("the response body contains the following booking details")
+    public void theResponseBodyContainsTheFollowingBookingDetails(DataTable dataTable) {
+        log.info("Verifying the response body contains the following booking details");
+
+        assertNotNull(testContext.getHttpResponse());
+        var actual = (BookingDto) testContext.getHttpResponse().getBody();
+        assertNotNull(actual);
+
+        var expected = dataTable.asMap();
+        // Verify the response body contains the expected booking details
+        expected.forEach((key, value) -> {
+            switch (key) {
+                case "bookingId" -> assertEquals(Long.parseLong(value), actual.getBookingId(), "Booking IDs do not match");
+                case "userId" -> assertEquals(Long.parseLong(value), actual.getUserId(), "User IDs do not match");
+                case "startTime" -> assertEquals(value, actual.getStartTime().toString(), "Start times do not match");
+                case "bookingStatus" -> assertEquals(value, actual.getBookingStatus().getValue(), "Booking statuses do not match");
+                case "comments" -> assertEquals(value, actual.getComments(), "Comments do not match");
+                default -> throw new IllegalArgumentException("Unsupported key: " + key);
+            }
+        });
+    }
 
 }

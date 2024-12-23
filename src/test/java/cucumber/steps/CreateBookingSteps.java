@@ -3,6 +3,7 @@ package cucumber.steps;
 import cucumber.context.TestContext;
 import cucumber.context.CucumberService;
 import iam.bookme.dto.BookingDto;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;
 import jakarta.transaction.Transactional;
@@ -16,6 +17,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RequiredArgsConstructor
 public class CreateBookingSteps {
@@ -38,7 +41,7 @@ public class CreateBookingSteps {
     }
 
 
-    private Map<String, Object> createBookingPayload(Map<String, Object> fieldsAndValues) throws Exception {
+    private Map<String, Object> createBookingPayload(Map<String, Object> fieldsAndValues) {
         Map<String, Object> payload = cucumberService.getBookingRequestDto(null);
         payload.putAll(fieldsAndValues);
         return payload;
@@ -107,14 +110,25 @@ public class CreateBookingSteps {
         cucumberService.doAPIObjectCall(endpoint, HttpMethod.POST, BookingDto.class, testContext.getCreateBookingRequestPayload(),
                 null);
         if (testContext.getHttpResponse()!= null && HttpStatus.CREATED.equals(testContext.getHttpResponse().getStatusCode())
-        && testContext.getHttpResponse().getBody() instanceof BookingDto dto){
-            testContext.getBookingsToDelete().add(dto.getBookingId());
-            testContext.setActiveBookingId(dto.getBookingId());
-            testContext.setBookingDto(dto);
+        && testContext.getHttpResponse().getBody() instanceof BookingDto createdDto){
+
+            log.info("Booking created with id {}", createdDto.getBookingId());
+            final var bookingId = createdDto.getBookingId();
+            testContext.getBookingsToDelete().add(bookingId);
+            testContext.setActiveBookingId(bookingId);
+            testContext.setBookingDto(createdDto);
         }
         else {
             testContext.setActiveBookingId(0L);
         }
+    }
+
+    @And("there are {int} bookings in the database")
+    public void thereAreBookingsInTheDatabase(int expected) {
+        log.info("Verify that there are {} bookings in the database", expected);
+
+        long actual = testContext.getInitialBookingsCountInDatabase() + 1;
+        assertEquals(expected, actual);
     }
 
 }

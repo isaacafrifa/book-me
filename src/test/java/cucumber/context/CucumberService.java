@@ -38,8 +38,6 @@ public class CucumberService {
     @Autowired
     private RestTemplate restTemplate;
     @Autowired
-    private BookingRepository bookingRepository;
-    @Autowired
     private ObjectMapper objectMapper;
 
     @Value("${app.api.host}")
@@ -64,7 +62,7 @@ public class CucumberService {
     private Map<String, Object> createInitialBookingRequestDto() {
         Map<String, Object> dto = new HashMap<>();
         dto.put("userEmail", "john.doe@example.com");
-        dto.put("startTime", "2023-08-01T10:00:00+00:00");
+        dto.put("startTime", "2030-08-01T10:00:00+00:00"); // startTime should be in the future
         dto.put("comments", "This is a side comment");
         return dto;
     }

@@ -28,7 +28,7 @@ public class CreateBookingSteps {
     private static final Logger log = LoggerFactory.getLogger(CreateBookingSteps.class);
 
     @Given("a request with the following fields is to be posted")
-    public void aRequestWithTheFollowingFieldsIsToBePosted(List<List<String>> items) throws Exception{
+    public void aRequestWithTheFollowingFieldsIsToBePosted(List<List<String>> items) {
         log.info("Create booking request with the ff fields \n{}", items);
         Map<String, Object> bookingPayload = createBookingPayload(convertToMap(items));
         testContext.setCreateBookingRequestPayload(bookingPayload);
@@ -113,10 +113,10 @@ public class CreateBookingSteps {
         && testContext.getHttpResponse().getBody() instanceof BookingDto createdDto){
 
             log.info("Booking created with id {}", createdDto.getBookingId());
+            testContext.setBookingDto(createdDto);
             final var bookingId = createdDto.getBookingId();
             testContext.getBookingsToDelete().add(bookingId);
             testContext.setActiveBookingId(bookingId);
-            testContext.setBookingDto(createdDto);
         }
         else {
             testContext.setActiveBookingId(0L);

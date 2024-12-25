@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Scope;
 
 import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static io.cucumber.spring.CucumberTestContext.SCOPE_CUCUMBER_GLUE;
@@ -40,36 +42,60 @@ public class WireMockHooks {
         wireMockServer.stop();
     }
 
-    private void mockUserServiceCall() {
-        // Match the exact endpoint and query parameter pattern
-        stubFor(WireMock.get(WireMock.urlPathEqualTo("/api/v1/users/email"))
-                .withQueryParam("userEmail", WireMock.equalTo("john.doe@example.com"))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(buildUserServiceResponse("john.doe@example.com"))));
+    private record UserEmailData(String firstName, String lastName, String email) {}
 
-        // For POST requests
-        stubFor(WireMock.post(WireMock.urlPathEqualTo("/api/v1/users"))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(201)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(buildUserServiceResponse("john.doe@example.com"))));
+    private static final List<UserEmailData> USER_EMAIL_DATA = Arrays.asList(
+            new UserEmailData("John", "Doe", "john.doe@example.com"),
+            new UserEmailData("Janet", "Jackson", "janet.jackson@test.com")
+    );
+
+    private void mockUserServiceCall() {
+        // Set up stubs for each user
+        for (UserEmailData userData : USER_EMAIL_DATA) {
+            // Match the exact endpoint and query parameter pattern for each email
+            stubFor(WireMock.get(WireMock.urlPathEqualTo("/api/v1/users/email"))
+                    .withQueryParam("userEmail", WireMock.equalTo(userData.email()))
+                    .willReturn(WireMock.aResponse()
+                            .withStatus(200)
+                            .withHeader("Content-Type", "application/json")
+                            .withBody(buildUserServiceResponse(userData.email()))));
+
+            // For POST requests
+            stubFor(WireMock.post(WireMock.urlPathEqualTo("/api/v1/users"))
+                    .willReturn(WireMock.aResponse()
+                            .withStatus(201)
+                            .withHeader("Content-Type", "application/json")
+                            .withBody(buildUserServiceResponse(userData.email()))));
+        }
 
         log.info("Stubbed GET and POST requests for user endpoints");
     }
 
     @SneakyThrows
     private String buildUserServiceResponse(String email) {
-        UserDto userDto = new UserDto(
-                "John",
-                "Doe",
-                email,
-                "1234567890",
-                1L,
-                OffsetDateTime.now(),
-                OffsetDateTime.now()
-        );
+        UserDto userDto = switch (email) {
+            case "john.doe@example.com" -> new UserDto(
+                    "John",
+                    "Doe",
+                    email,
+                    "1234567890",
+                    1L,
+                    OffsetDateTime.now(),
+                    OffsetDateTime.now()
+            );
+            case "janet.jackson@test.com" -> new UserDto(
+                    "Janet",
+                    "Jackson",
+                    email,
+                    "9876543210",
+                    2L,
+                    OffsetDateTime.now(),
+                    OffsetDateTime.now()
+            );
+            default -> throw new IllegalArgumentException("Unexpected email: " + email);
+        };
+
         return objectMapper.writeValueAsString(userDto);
     }
+
 }

@@ -46,24 +46,24 @@ Feature: Create bookings
     When the endpoint "/bookings" is called to post a booking
     Then the response status code 201 should be returned
     And the response body contains the following booking details
-      # startTime converted to UK time
+      # startTime would be converted to UK time
       | startTime     | 2035-08-01T04:30Z |
       | bookingStatus | Pending           |
 
-#  Scenario: Create booking with time slot conflict
-#    Given a booking exists for "2023-08-01T10:00Z"
-#    When a request with the following fields is to be posted
-#      | startTime | 2023-08-01T10:00Z |
-#    Then the response status code 409 should be returned
-#    And the error message contains "Time slot already booked"
-
-
-#  Scenario: Create booking with invalid user
-#    Given a request with the following fields is to be posted
-#      | userId | 999 |
-#    When the endpoint "/bookings" is called to post a booking
-#    Then the response status code 404 should be returned
-#    And the error message contains "User not found"
+  @RemoveBookings
+  Scenario: Create booking with 'janet.jackson@test.com' user and no comment
+    Given a request with the following fields is to be posted
+      | userEmail | janet.jackson@test.com |
+      | comments  |                       |
+    When the endpoint "/bookings" is called to post a booking
+    Then the response status code 201 should be returned
+#    And there are 6 bookings in the database
+    And the response body contains the following booking details
+#      | bookingId     | 6                 |
+      | userId        | 2                 |
+      | startTime     | 2030-08-01T10:00Z |
+      | bookingStatus | Pending           |
+      | comments      |                   |
 
 
 #  Scenario: Create multiple bookings in quick succession
@@ -71,6 +71,13 @@ Feature: Create bookings
 #    When the endpoint "/bookings" is called for all requests simultaneously
 #    Then only one booking should be created
 #    And other requests should receive 409 status code
+
+#  Scenario: Create booking with time slot conflict
+#    Given a booking exists for "2023-08-01T10:00Z"
+#    When a request with the following fields is to be posted
+#      | startTime | 2023-08-01T10:00Z |
+#    Then the response status code 409 should be returned
+#    And the error message contains "Time slot already booked"
 
 
 

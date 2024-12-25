@@ -20,7 +20,7 @@ public class SpringIntegrationConfiguration {
 
     @Before
     public void setUp() {
-        // method to run before scenarios
+        // method ran before scenarios
         System.out.println("--- Cucumber SpringIntegrationConfiguration has been setUp ---");
     }
 

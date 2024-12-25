@@ -18,7 +18,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class RemoveBookingHook implements BeanFactoryAware {
 
-
     private final TestContext testContext;
     private final BookingRepository bookingRepository;
     private final CacheManager cacheManager;
@@ -36,7 +35,7 @@ public class RemoveBookingHook implements BeanFactoryAware {
                         .filter(Optional::isPresent)
                         .map(Optional::get)
                         .forEach(booking -> {
-                            log.info("Deleting booking from database{}", booking.getBookingId());
+                            log.info("Deleting from database booking with id '{}'", booking.getBookingId());
                             bookingRepository.deleteById(booking.getBookingId());
                         });
         // Clear the cache if caching is used in the code notably the Repository

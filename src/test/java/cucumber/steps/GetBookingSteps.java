@@ -175,7 +175,7 @@ public class GetBookingSteps {
 
     @And("the response body contains the following booking details")
     public void theResponseBodyContainsTheFollowingBookingDetails(DataTable dataTable) {
-        log.info("Verifying the response body contains the following booking details");
+        log.info("Verifying the response body contains the following booking details: \n{}", dataTable);
 
         assertNotNull(testContext.getHttpResponse());
         var actual = (BookingDto) testContext.getHttpResponse().getBody();

@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>iam</groupId>
-    <artifactId>bookme</artifactId>
+    <artifactId>booking-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>book-me</name>
     <description>book-me</description>
@@ -23,6 +23,9 @@
         <cucumber.version>7.20.1</cucumber.version>
         <cucumber-reporting.version>5.8.2</cucumber-reporting.version>
         <wiremock.version>3.9.1</wiremock.version>
+        <maven.build.timestamp.format>yyyyMMdd.HHmmss</maven.build.timestamp.format>
+        <!--suppress UnresolvedMavenProperty -->
+        <dockerPassword>${DOCKER_PASSWORD}</dockerPassword>
     </properties>
     <dependencies>
         <dependency>
@@ -227,6 +230,19 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <!-- This block defines Docker image settings using cloud native build-packs -->
+                    <image>
+                        <name>isaacafrifa/bm-${project.artifactId}-${maven.build.timestamp}</name>
+                        <builder>dashaun/builder:tiny</builder><!--  Specify the builder to use for creating the container image  -->
+                        <publish>true</publish>
+                    </image>
+                    <docker>
+                        <publishRegistry>
+                            <username>isaacafrifa</username>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <password>${DOCKER_PASSWORD}</password>
+                        </publishRegistry>
+                    </docker>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>

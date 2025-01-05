@@ -1,0 +1,138 @@
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking-app
+  labels:
+    app: booking-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: booking-app
+  template:
+    metadata:
+      name: booking-template
+      labels:
+        app: booking-app
+    spec:
+      containers:
+        - name: booking-service
+          image: isaacafrifa/bm-booking-service:0.0.1-SNAPSHOT-20241229-2119
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+              protocol: TCP
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: booking-config
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: booking-config
+                  key: DB_PORT
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: booking-secrets
+                  key: POSTGRES_DB
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: booking-secrets
+                  key: POSTGRES_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: booking-secrets
+                  key: POSTGRES_PASSWORD
+            # Shared Infrastructure Variables
+            ## User Service URL - referenced in UserClient
+            - name: USER_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: infra-config
+                  key: USER_SERVICE_URL
+            ## Loki
+            - name: LOKI_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: infra-config
+                  key: LOKI_URL
+            ## rabbitMQ
+            - name: RABBITMQ_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: infra-config
+                  key:  RABBITMQ_HOST
+            - name: RABBITMQ_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: infra-config
+                  key:  RABBITMQ_PORT
+            - name: RABBITMQ_MANAGEMENT_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: infra-config
+                  key:  RABBITMQ_MANAGEMENT_PORT
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: infra-secrets
+                  key: RABBITMQ_USERNAME
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: infra-secrets
+                  key: RABBITMQ_PASSWORD
+            ## zipkin
+            - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: infra-config
+                  key: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            initialDelaySeconds: 10
+            periodSeconds: 5
+  strategy:
+    # RollingUpdate strategy ensures zero-downtime during deployments by gradually updating pods
+    type: RollingUpdate
+    rollingUpdate:
+      # Allow creating max 1 pod above desired count during updates
+      # Example: If replicas=3, we can have 4 pods temporarily during update
+      maxSurge: 1
+      # Ensure no pods become unavailable during the update
+      # Forces new pods to be ready before removing old ones
+      maxUnavailable: 0
+
+  # add resource limits and requests later
+
+---
+
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: booking-service
+  labels:
+    app: booking-app    # Match the deployment labels
+spec:
+  type: ClusterIP
+  selector:
+    app: booking-app  # Matches Deployment's label
+  ports:
+    - protocol: TCP
+      port: 8081      # The port other services use to access
+      targetPort: 8081  # The container port

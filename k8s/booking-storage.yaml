@@ -14,7 +14,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain    # Keeps data when PVC is deleted
   storageClassName: standard               # Default storage class in Minikube
   hostPath:                               # For Minikube, uses local machine storage
-    path: "/var/lib/postgresql/data"           # Directory on your host machine
+    path: "/var/lib/postgresql/booking-db-data" # Unique directory for booking-db # Directory on your host machine
 
 ---
 

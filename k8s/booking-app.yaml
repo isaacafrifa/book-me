@@ -36,8 +36,8 @@ spec:
                   key: DB_PORT
             - name: DB_NAME
               valueFrom:
-                secretKeyRef:
-                  name: booking-secrets
+                configMapKeyRef:
+                  name: booking-config
                   key: POSTGRES_DB
             - name: DB_USERNAME
               valueFrom:

@@ -29,14 +29,14 @@ spec:
                   key: POSTGRES_PASSWORD
             - name: POSTGRES_DB
               valueFrom:
-                secretKeyRef:
-                  name: booking-secrets
+                configMapKeyRef:
+                  name: booking-config
                   key: POSTGRES_DB
           ports:
             - containerPort: 5432
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
-              name: postgres-data
+              name: booking-data
           resources:
             requests:
               cpu: "200m"
@@ -45,7 +45,7 @@ spec:
               cpu: "500m"
               memory: "1Gi"
       volumes:
-        - name: postgres-data # matches volumeMounts name above
+        - name: booking-data # matches volumeMounts name above
           persistentVolumeClaim:
             claimName: booking-pvc # references the PVC in 'postgres-storage.yaml'
 ---

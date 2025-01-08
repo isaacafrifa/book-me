@@ -6,4 +6,4 @@ metadata:
 data:
   DB_HOST: "booking-db-service" # Should be the same as name of the service in the booking-db.yaml
   DB_PORT: "5432" # Should be the same as the port of the service in the booking-db.yaml
-#  POSTGRES_DB: "bookings"
+  POSTGRES_DB: "bookme_bookings"
